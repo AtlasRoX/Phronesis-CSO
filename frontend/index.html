@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phronesis CSO — Target Assessment</title>
+
+  <!-- Google Sans font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Phosphor Icons — bold weight (CSS icon font, zero JS dependency) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css" />
+
+  <!-- React + Tailwind — vendored for offline reliability -->
+  <script src="./vendor/react.js"></script>
+  <script src="./vendor/react-dom.js"></script>
+  <script src="./vendor/tailwind.js"></script>
+
+  <style>
+    :root {
+      --bio-bg: #ffffff;
+      --bio-cyan: #0284c7;
+      --bio-teal: #0d9488;
+    }
+    html, body { height: 100%; margin: 0; overflow: hidden; }
+    #root { height: 100%; display: flex; flex-direction: column; }
+    body {
+      font-family: "Google Sans", system-ui, sans-serif;
+      font-optical-sizing: auto;
+      font-variation-settings: "GRAD" 0;
+      color: #0f172a;
+      background-color: #ffffff;
+      background-image:
+        radial-gradient(70% 55% at 50% -8%, rgba(2,132,199,0.04), transparent 60%),
+        linear-gradient(rgba(148,163,184,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148,163,184,0.02) 1px, transparent 1px);
+      background-size: auto, 38px 38px, 38px 38px;
+      background-attachment: fixed;
+    }
+    .mono { font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace; font-feature-settings: "ss01","cv01"; letter-spacing: -0.01em; }
+    h1, h2, h3 { font-family: "Google Sans", system-ui, sans-serif; letter-spacing: -0.018em; }
+
+    ::-webkit-scrollbar { width: 9px; height: 9px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; border: 2px solid transparent; background-clip: padding-box; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; background-clip: padding-box; }
+
+    @keyframes fadeUp { from { opacity:0; transform: translateY(8px);} to {opacity:1; transform:none;} }
+    .fade-up { animation: fadeUp .4s ease both; }
+    @keyframes pulse-ring { 0%{box-shadow:0 0 0 0 rgba(34,211,238,.5);} 70%{box-shadow:0 0 0 9px rgba(34,211,238,0);} 100%{box-shadow:0 0 0 0 rgba(34,211,238,0);} }
+    .pulse-ring { animation: pulse-ring 1.8s infinite; }
+
+    @keyframes bioShimmer { 0%{background-position: -180% 0;} 100%{background-position: 180% 0;} }
+    .bio-shimmer {
+      background-image: linear-gradient(100deg, transparent 20%, rgba(34,211,238,0.16) 50%, transparent 80%);
+      background-size: 220% 100%;
+      animation: bioShimmer 2.2s linear infinite;
+    }
+    @keyframes bioBreath { 0%,100%{opacity:.55;} 50%{opacity:1;} }
+    .bio-breath { animation: bioBreath 2.4s ease-in-out infinite; }
+
+    .bio-glass { backdrop-filter: blur(10px) saturate(120%); -webkit-backdrop-filter: blur(10px) saturate(120%); }
+    .bio-panel {
+      position: relative;
+      box-shadow: 0 1px 0 rgba(148,163,184,0.04) inset, 0 18px 40px -28px rgba(0,0,0,0.9);
+    }
+    .bio-accent-top::before {
+      content: ""; position: absolute; left: 14px; right: 14px; top: 0; height: 2px; border-radius: 2px;
+      background: linear-gradient(90deg, transparent, var(--bio-cyan), var(--bio-teal), transparent);
+      opacity: 0.8;
+    }
+    .bio-accent-amber::before  { background: linear-gradient(90deg, transparent, #fbbf24, #f59e0b, transparent); }
+    .bio-accent-rose::before   { background: linear-gradient(90deg, transparent, #fb7185, #f43f5e, transparent); }
+    .bio-accent-emerald::before{ background: linear-gradient(90deg, transparent, #34d399, #10b981, transparent); }
+    .bio-accent-fuchsia::before{ background: linear-gradient(90deg, transparent, #e879f9, #c026d3, transparent); }
+  </style>
+</head>
+<body class="text-slate-900 antialiased">
+  <div id="root"></div>
+  <!-- Precompiled from app.jsx (classic React.createElement runtime) -->
+  <script src="./app.js"></script>
+</body>
+</html>

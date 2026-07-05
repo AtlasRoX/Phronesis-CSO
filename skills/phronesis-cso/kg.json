@@ -1,0 +1,855 @@
+{
+  "nodes": [
+    {
+      "id": "target:b7-h3",
+      "kind": "Target",
+      "label": "B7-H3",
+      "runs": [
+        "run-b7h3-0",
+        "run-b7h3-12",
+        "run-b7h3-16",
+        "run-b7h3-6"
+      ],
+      "canonical_symbol": "CD276",
+      "canonical_id": "ENSG00000103855",
+      "ontology": "Ensembl",
+      "alias_of": "CD276"
+    },
+    {
+      "id": "disease:luad",
+      "kind": "Disease",
+      "label": "LUAD",
+      "runs": [
+        "run-b7h3-0",
+        "run-b7h3-12",
+        "run-b7h3-16",
+        "run-b7h3-6",
+        "run-evaluate_met_as_a_target_in-5"
+      ],
+      "canonical_symbol": "lung adenocarcinoma",
+      "canonical_id": "MONDO_0005061",
+      "ontology": "MONDO",
+      "alias_of": "lung adenocarcinoma"
+    },
+    {
+      "id": "tissue:broad-normal-tissue",
+      "kind": "Tissue",
+      "label": "broad/normal tissue",
+      "runs": [
+        "run-assess_her2_in_breast_cancer-16",
+        "run-b7h3-0",
+        "run-b7h3-12",
+        "run-b7h3-16",
+        "run-b7h3-6"
+      ]
+    },
+    {
+      "id": "trial:nct04145622",
+      "kind": "Trial",
+      "label": "Ifinatamab deruxtecan (DS-7300/I-DXd), solid tumours incl. NSCLC",
+      "runs": [
+        "run-assess_her2_in_breast_cancer-16",
+        "run-b7h3-0",
+        "run-b7h3-12",
+        "run-b7h3-16",
+        "run-b7h3-6"
+      ],
+      "url": "https://clinicaltrials.gov/study/NCT04145622"
+    },
+    {
+      "id": "trial:nct05276609",
+      "kind": "Trial",
+      "label": "HS-20093 (B7-H3 ADC), advanced solid tumours",
+      "runs": [
+        "run-assess_her2_in_breast_cancer-16",
+        "run-b7h3-0",
+        "run-b7h3-12",
+        "run-b7h3-16",
+        "run-b7h3-6"
+      ],
+      "url": "https://clinicaltrials.gov/study/NCT05276609"
+    },
+    {
+      "id": "target:met",
+      "kind": "Target",
+      "label": "MET",
+      "runs": [
+        "run-evaluate_met_as_a_target_in-5"
+      ],
+      "canonical_symbol": "MET",
+      "canonical_id": "ENSG00000105976",
+      "ontology": "Ensembl"
+    },
+    {
+      "id": "target:cd276",
+      "kind": "Target",
+      "label": "CD276",
+      "runs": [
+        "run-b7h3-6"
+      ],
+      "canonical_symbol": "CD276",
+      "canonical_id": "ENSG00000103855",
+      "ontology": "Ensembl"
+    },
+    {
+      "id": "celltype:b-cells",
+      "kind": "CellType",
+      "label": "B cells",
+      "runs": [
+        "run-b7h3-16",
+        "run-b7h3-6",
+        "run-compare_her2_and_cldn18_2_in-10"
+      ]
+    },
+    {
+      "id": "celltype:fcgr3a-monocytes",
+      "kind": "CellType",
+      "label": "FCGR3A+ Monocytes",
+      "runs": [
+        "run-b7h3-16",
+        "run-b7h3-6",
+        "run-compare_her2_and_cldn18_2_in-10"
+      ]
+    },
+    {
+      "id": "celltype:dendritic-cells",
+      "kind": "CellType",
+      "label": "Dendritic cells",
+      "runs": [
+        "run-b7h3-16",
+        "run-b7h3-6",
+        "run-compare_her2_and_cldn18_2_in-10"
+      ]
+    },
+    {
+      "id": "target:her2",
+      "kind": "Target",
+      "label": "HER2",
+      "runs": [
+        "run-assess_her2_in_breast_cancer-16",
+        "run-compare_her2_and_cldn18_2_in-10"
+      ],
+      "canonical_symbol": "ERBB2",
+      "canonical_id": "ENSG00000141736",
+      "ontology": "Ensembl",
+      "alias_of": "ERBB2"
+    },
+    {
+      "id": "disease:disease",
+      "kind": "Disease",
+      "label": "disease",
+      "runs": [
+        "run-assess_her2_in_breast_cancer-16",
+        "run-compare_her2_and_cldn18_2_in-10"
+      ]
+    },
+    {
+      "id": "trial:nct06902545",
+      "kind": "Trial",
+      "label": "A Study to Observe the Safety of VYLOY (Zolbetuximab) in People in South Korea With Gastric or Gastroesophageal Junction Cancer.",
+      "runs": [
+        "run-compare_her2_and_cldn18_2_in-10"
+      ],
+      "url": "https://clinicaltrials.gov/study/NCT06902545"
+    },
+    {
+      "id": "trial:nct03653507",
+      "kind": "Trial",
+      "label": "A Study of Zolbetuximab (IMAB362) Plus CAPOX Compared With Placebo Plus CAPOX as First-line Treatment of Subjects With Claudin (CLDN) 18.2-positive, HER2-negative, Locally Advanced Unresectable or Metastatic Gastric or Gastroesophageal Junction (GEJ) Adenocarcinoma (GLOW).",
+      "runs": [
+        "run-compare_her2_and_cldn18_2_in-10"
+      ],
+      "url": "https://clinicaltrials.gov/study/NCT03653507"
+    },
+    {
+      "id": "trial:nct03504397",
+      "kind": "Trial",
+      "label": "A Study to Compare Zolbetuximab (IMAB362) and Chemotherapy With Placebo and Chemotherapy in Adults With Gastric Cancer.",
+      "runs": [
+        "run-compare_her2_and_cldn18_2_in-10"
+      ],
+      "url": "https://clinicaltrials.gov/study/NCT03504397"
+    },
+    {
+      "id": "trial:nct07284134",
+      "kind": "Trial",
+      "label": "JS107 vs Investigator's Choice as Second-line or Later Therapy for Advanced CLDN18.2-Positive Gastricor GEJ Adenocarcinoma.",
+      "runs": [
+        "run-compare_her2_and_cldn18_2_in-10"
+      ],
+      "url": "https://clinicaltrials.gov/study/NCT07284134"
+    }
+  ],
+  "edges": [
+    {
+      "id": "target:b7-h3|TARGETS|disease:luad",
+      "s": "target:b7-h3",
+      "t": "disease:luad",
+      "type": "TARGETS",
+      "runs": [
+        "run-b7h3-0",
+        "run-b7h3-12",
+        "run-b7h3-16",
+        "run-b7h3-6"
+      ],
+      "observations": 48,
+      "conf": 1.0,
+      "prov": "computed",
+      "modality": null
+    },
+    {
+      "id": "target:b7-h3|GENETIC_LINK|disease:luad",
+      "s": "target:b7-h3",
+      "t": "disease:luad",
+      "type": "GENETIC_LINK",
+      "runs": [
+        "run-b7h3-0",
+        "run-b7h3-12",
+        "run-b7h3-16",
+        "run-b7h3-6"
+      ],
+      "observations": 21,
+      "conf": 0.2,
+      "axis": "target_validity",
+      "value": "no genome-wide assoc.",
+      "grade": "illustrative",
+      "prov": "computed",
+      "source": "GWAS Catalog",
+      "url": "https://www.ebi.ac.uk/gwas/",
+      "ref": "GWAS Catalog / Open Targets / PheWeb (federated) \u2014 https://www.ebi.ac.uk/gwas/",
+      "step": "step_01_gwas"
+    },
+    {
+      "id": "target:b7-h3|SPECIFIC_TO|disease:luad",
+      "s": "target:b7-h3",
+      "t": "disease:luad",
+      "type": "SPECIFIC_TO",
+      "runs": [
+        "run-b7h3-0",
+        "run-b7h3-12",
+        "run-b7h3-16",
+        "run-b7h3-6"
+      ],
+      "observations": 26,
+      "conf": 0.9,
+      "axis": "specificity",
+      "value": "\u03c4=0.9556",
+      "grade": "strong",
+      "prov": "computed",
+      "source": "Single-cell atlas (Scanpy)",
+      "url": "",
+      "ref": "derived: tau + bimodality on the fetched atlas; atlas=pbmc3k (10x, real; scanpy bundled)",
+      "step": "step_06_off_target_expression"
+    },
+    {
+      "id": "target:b7-h3|OFF_TARGET_IN|tissue:broad-normal-tissue",
+      "s": "target:b7-h3",
+      "t": "tissue:broad-normal-tissue",
+      "type": "OFF_TARGET_IN",
+      "runs": [
+        "run-b7h3-0",
+        "run-b7h3-12",
+        "run-b7h3-16",
+        "run-b7h3-6"
+      ],
+      "observations": 21,
+      "conf": 0.6,
+      "axis": "specificity",
+      "value": "risk: moderate-low",
+      "grade": "illustrative",
+      "prov": "computed",
+      "source": "Derived: \u03c4-specificity analysis",
+      "url": "",
+      "ref": "derived: tau + bimodality on the fetched atlas",
+      "step": "step_04_offtarget_safety"
+    },
+    {
+      "id": "target:b7-h3|EVALUATED_IN|trial:nct04145622",
+      "s": "target:b7-h3",
+      "t": "trial:nct04145622",
+      "type": "EVALUATED_IN",
+      "runs": [
+        "run-b7h3-0",
+        "run-b7h3-12",
+        "run-b7h3-16",
+        "run-b7h3-6"
+      ],
+      "observations": 21,
+      "conf": 0.6,
+      "axis": "tractability",
+      "value": "prior program",
+      "grade": "illustrative",
+      "prov": "computed",
+      "source": "ClinicalTrials.gov",
+      "url": "https://clinicaltrials.gov/study/NCT04145622",
+      "ref": "ClinicalTrials.gov API v2 (+ EUCTR); https://clinicaltrials.gov/study/NCT04145622 \u2014 https://clinicaltrials.gov/study/NCT04145622",
+      "step": "step_05_clinical_trials"
+    },
+    {
+      "id": "disease:luad|TREATED_IN|trial:nct04145622",
+      "s": "disease:luad",
+      "t": "trial:nct04145622",
+      "type": "TREATED_IN",
+      "runs": [
+        "run-b7h3-0",
+        "run-b7h3-12",
+        "run-b7h3-16",
+        "run-b7h3-6"
+      ],
+      "observations": 21,
+      "conf": 0.6,
+      "axis": "tractability",
+      "prov": "computed",
+      "source": "ClinicalTrials.gov",
+      "url": "https://clinicaltrials.gov/study/NCT04145622",
+      "ref": "ClinicalTrials.gov API v2 (+ EUCTR); https://clinicaltrials.gov/study/NCT04145622 \u2014 https://clinicaltrials.gov/study/NCT04145622",
+      "step": "step_05_clinical_trials"
+    },
+    {
+      "id": "target:b7-h3|EVALUATED_IN|trial:nct05276609",
+      "s": "target:b7-h3",
+      "t": "trial:nct05276609",
+      "type": "EVALUATED_IN",
+      "runs": [
+        "run-b7h3-0",
+        "run-b7h3-12",
+        "run-b7h3-16",
+        "run-b7h3-6"
+      ],
+      "observations": 21,
+      "conf": 0.6,
+      "axis": "tractability",
+      "value": "prior program",
+      "grade": "illustrative",
+      "prov": "computed",
+      "source": "ClinicalTrials.gov",
+      "url": "https://clinicaltrials.gov/study/NCT05276609",
+      "ref": "ClinicalTrials.gov API v2 (+ EUCTR); https://clinicaltrials.gov/study/NCT04145622 \u2014 https://clinicaltrials.gov/study/NCT04145622",
+      "step": "step_05_clinical_trials"
+    },
+    {
+      "id": "disease:luad|TREATED_IN|trial:nct05276609",
+      "s": "disease:luad",
+      "t": "trial:nct05276609",
+      "type": "TREATED_IN",
+      "runs": [
+        "run-b7h3-0",
+        "run-b7h3-12",
+        "run-b7h3-16",
+        "run-b7h3-6"
+      ],
+      "observations": 21,
+      "conf": 0.6,
+      "axis": "tractability",
+      "prov": "computed",
+      "source": "ClinicalTrials.gov",
+      "url": "https://clinicaltrials.gov/study/NCT05276609",
+      "ref": "ClinicalTrials.gov API v2 (+ EUCTR); https://clinicaltrials.gov/study/NCT04145622 \u2014 https://clinicaltrials.gov/study/NCT04145622",
+      "step": "step_05_clinical_trials"
+    },
+    {
+      "id": "target:met|TARGETS|disease:luad",
+      "s": "target:met",
+      "t": "disease:luad",
+      "type": "TARGETS",
+      "runs": [
+        "run-evaluate_met_as_a_target_in-5"
+      ],
+      "observations": 2,
+      "conf": 1.0,
+      "prov": "computed",
+      "modality": null
+    },
+    {
+      "id": "target:cd276|TARGETS|disease:luad",
+      "s": "target:cd276",
+      "t": "disease:luad",
+      "type": "TARGETS",
+      "runs": [
+        "run-b7h3-6"
+      ],
+      "observations": 2,
+      "conf": 1.0,
+      "prov": "computed",
+      "modality": null
+    },
+    {
+      "id": "target:cd276|EXPRESSED_IN|celltype:b-cells",
+      "s": "target:cd276",
+      "t": "celltype:b-cells",
+      "type": "EXPRESSED_IN",
+      "runs": [
+        "run-b7h3-6"
+      ],
+      "observations": 2,
+      "conf": 0.8596,
+      "axis": "specificity",
+      "value": "86% expressing \u00b7 mean 0.993",
+      "grade": "strong",
+      "prov": "computed",
+      "source": "Single-cell atlas (Scanpy)",
+      "url": "",
+      "ref": "CD276 in B cells: mean expr 0.993, 86% expressing.",
+      "step": "step_04_offtarget_safety"
+    },
+    {
+      "id": "target:cd276|EXPRESSED_IN|celltype:fcgr3a-monocytes",
+      "s": "target:cd276",
+      "t": "celltype:fcgr3a-monocytes",
+      "type": "EXPRESSED_IN",
+      "runs": [
+        "run-b7h3-6"
+      ],
+      "observations": 2,
+      "conf": 0.0867,
+      "axis": "specificity",
+      "value": "9% expressing \u00b7 mean 0.0601",
+      "grade": "strong",
+      "prov": "computed",
+      "source": "Single-cell atlas (Scanpy)",
+      "url": "",
+      "ref": "CD276 in FCGR3A+ Monocytes: mean expr 0.0601, 9% expressing.",
+      "step": "step_04_offtarget_safety"
+    },
+    {
+      "id": "target:cd276|EXPRESSED_IN|celltype:dendritic-cells",
+      "s": "target:cd276",
+      "t": "celltype:dendritic-cells",
+      "type": "EXPRESSED_IN",
+      "runs": [
+        "run-b7h3-6"
+      ],
+      "observations": 2,
+      "conf": 0.0811,
+      "axis": "specificity",
+      "value": "8% expressing \u00b7 mean 0.0562",
+      "grade": "strong",
+      "prov": "computed",
+      "source": "Single-cell atlas (Scanpy)",
+      "url": "",
+      "ref": "CD276 in Dendritic cells: mean expr 0.0562, 8% expressing.",
+      "step": "step_04_offtarget_safety"
+    },
+    {
+      "id": "target:cd276|SPECIFIC_TO|disease:luad",
+      "s": "target:cd276",
+      "t": "disease:luad",
+      "type": "SPECIFIC_TO",
+      "runs": [
+        "run-b7h3-6"
+      ],
+      "observations": 2,
+      "conf": 0.9,
+      "axis": "specificity",
+      "value": "\u03c4=0.9556",
+      "grade": "strong",
+      "prov": "computed",
+      "source": "Single-cell atlas (Scanpy)",
+      "url": "",
+      "ref": "derived: tau + bimodality on the fetched atlas; atlas=pbmc3k (10x, real; scanpy bundled)",
+      "step": "step_04_offtarget_safety"
+    },
+    {
+      "id": "target:her2|TARGETS|disease:disease",
+      "s": "target:her2",
+      "t": "disease:disease",
+      "type": "TARGETS",
+      "runs": [
+        "run-assess_her2_in_breast_cancer-16",
+        "run-compare_her2_and_cldn18_2_in-10"
+      ],
+      "observations": 4,
+      "conf": 1.0,
+      "prov": "computed",
+      "modality": null
+    },
+    {
+      "id": "target:her2|EXPRESSED_IN|celltype:b-cells",
+      "s": "target:her2",
+      "t": "celltype:b-cells",
+      "type": "EXPRESSED_IN",
+      "runs": [
+        "run-compare_her2_and_cldn18_2_in-10"
+      ],
+      "observations": 2,
+      "conf": 0.8596,
+      "axis": "specificity",
+      "value": "86% expressing \u00b7 mean 0.993",
+      "grade": "strong",
+      "prov": "computed",
+      "source": "Single-cell atlas (Scanpy)",
+      "url": "",
+      "ref": "HER2 in B cells: mean expr 0.993, 86% expressing.",
+      "step": "step_04_off_target_expression"
+    },
+    {
+      "id": "target:her2|EXPRESSED_IN|celltype:fcgr3a-monocytes",
+      "s": "target:her2",
+      "t": "celltype:fcgr3a-monocytes",
+      "type": "EXPRESSED_IN",
+      "runs": [
+        "run-compare_her2_and_cldn18_2_in-10"
+      ],
+      "observations": 2,
+      "conf": 0.0867,
+      "axis": "specificity",
+      "value": "9% expressing \u00b7 mean 0.0601",
+      "grade": "strong",
+      "prov": "computed",
+      "source": "Single-cell atlas (Scanpy)",
+      "url": "",
+      "ref": "HER2 in FCGR3A+ Monocytes: mean expr 0.0601, 9% expressing.",
+      "step": "step_04_off_target_expression"
+    },
+    {
+      "id": "target:her2|EXPRESSED_IN|celltype:dendritic-cells",
+      "s": "target:her2",
+      "t": "celltype:dendritic-cells",
+      "type": "EXPRESSED_IN",
+      "runs": [
+        "run-compare_her2_and_cldn18_2_in-10"
+      ],
+      "observations": 2,
+      "conf": 0.0811,
+      "axis": "specificity",
+      "value": "8% expressing \u00b7 mean 0.0562",
+      "grade": "strong",
+      "prov": "computed",
+      "source": "Single-cell atlas (Scanpy)",
+      "url": "",
+      "ref": "HER2 in Dendritic cells: mean expr 0.0562, 8% expressing.",
+      "step": "step_04_off_target_expression"
+    },
+    {
+      "id": "target:her2|SPECIFIC_TO|disease:disease",
+      "s": "target:her2",
+      "t": "disease:disease",
+      "type": "SPECIFIC_TO",
+      "runs": [
+        "run-assess_her2_in_breast_cancer-16",
+        "run-compare_her2_and_cldn18_2_in-10"
+      ],
+      "observations": 3,
+      "conf": 0.9,
+      "axis": "specificity",
+      "value": "\u03c4=0.9556",
+      "grade": "strong",
+      "prov": "computed",
+      "source": "Single-cell atlas (Scanpy)",
+      "url": "",
+      "ref": "derived: tau + bimodality on the fetched atlas; atlas=pbmc3k (10x, real; scanpy bundled)",
+      "step": "step_04_off_target_expression"
+    },
+    {
+      "id": "target:her2|EVALUATED_IN|trial:nct06902545",
+      "s": "target:her2",
+      "t": "trial:nct06902545",
+      "type": "EVALUATED_IN",
+      "runs": [
+        "run-compare_her2_and_cldn18_2_in-10"
+      ],
+      "observations": 1,
+      "conf": 0.9,
+      "axis": "tractability",
+      "value": "prior program",
+      "grade": "strong",
+      "prov": "computed",
+      "source": "ClinicalTrials.gov",
+      "url": "https://clinicaltrials.gov/study/NCT06902545",
+      "ref": "ClinicalTrials.gov API v2 (+ EUCTR); https://clinicaltrials.gov/study/NCT06902545 \u2014 https://clinicaltrials.gov/study/NCT06902545",
+      "step": "step_02_prior_trials_and_outcomes"
+    },
+    {
+      "id": "disease:disease|TREATED_IN|trial:nct06902545",
+      "s": "disease:disease",
+      "t": "trial:nct06902545",
+      "type": "TREATED_IN",
+      "runs": [
+        "run-compare_her2_and_cldn18_2_in-10"
+      ],
+      "observations": 1,
+      "conf": 0.9,
+      "axis": "tractability",
+      "prov": "computed",
+      "source": "ClinicalTrials.gov",
+      "url": "https://clinicaltrials.gov/study/NCT06902545",
+      "ref": "ClinicalTrials.gov API v2 (+ EUCTR); https://clinicaltrials.gov/study/NCT06902545 \u2014 https://clinicaltrials.gov/study/NCT06902545",
+      "step": "step_02_prior_trials_and_outcomes"
+    },
+    {
+      "id": "target:her2|EVALUATED_IN|trial:nct03653507",
+      "s": "target:her2",
+      "t": "trial:nct03653507",
+      "type": "EVALUATED_IN",
+      "runs": [
+        "run-compare_her2_and_cldn18_2_in-10"
+      ],
+      "observations": 1,
+      "conf": 0.9,
+      "axis": "tractability",
+      "value": "prior program",
+      "grade": "strong",
+      "prov": "computed",
+      "source": "ClinicalTrials.gov",
+      "url": "https://clinicaltrials.gov/study/NCT03653507",
+      "ref": "ClinicalTrials.gov API v2 (+ EUCTR); https://clinicaltrials.gov/study/NCT06902545 \u2014 https://clinicaltrials.gov/study/NCT06902545",
+      "step": "step_02_prior_trials_and_outcomes"
+    },
+    {
+      "id": "disease:disease|TREATED_IN|trial:nct03653507",
+      "s": "disease:disease",
+      "t": "trial:nct03653507",
+      "type": "TREATED_IN",
+      "runs": [
+        "run-compare_her2_and_cldn18_2_in-10"
+      ],
+      "observations": 1,
+      "conf": 0.9,
+      "axis": "tractability",
+      "prov": "computed",
+      "source": "ClinicalTrials.gov",
+      "url": "https://clinicaltrials.gov/study/NCT03653507",
+      "ref": "ClinicalTrials.gov API v2 (+ EUCTR); https://clinicaltrials.gov/study/NCT06902545 \u2014 https://clinicaltrials.gov/study/NCT06902545",
+      "step": "step_02_prior_trials_and_outcomes"
+    },
+    {
+      "id": "target:her2|EVALUATED_IN|trial:nct03504397",
+      "s": "target:her2",
+      "t": "trial:nct03504397",
+      "type": "EVALUATED_IN",
+      "runs": [
+        "run-compare_her2_and_cldn18_2_in-10"
+      ],
+      "observations": 1,
+      "conf": 0.9,
+      "axis": "tractability",
+      "value": "prior program",
+      "grade": "strong",
+      "prov": "computed",
+      "source": "ClinicalTrials.gov",
+      "url": "https://clinicaltrials.gov/study/NCT03504397",
+      "ref": "ClinicalTrials.gov API v2 (+ EUCTR); https://clinicaltrials.gov/study/NCT06902545 \u2014 https://clinicaltrials.gov/study/NCT06902545",
+      "step": "step_02_prior_trials_and_outcomes"
+    },
+    {
+      "id": "disease:disease|TREATED_IN|trial:nct03504397",
+      "s": "disease:disease",
+      "t": "trial:nct03504397",
+      "type": "TREATED_IN",
+      "runs": [
+        "run-compare_her2_and_cldn18_2_in-10"
+      ],
+      "observations": 1,
+      "conf": 0.9,
+      "axis": "tractability",
+      "prov": "computed",
+      "source": "ClinicalTrials.gov",
+      "url": "https://clinicaltrials.gov/study/NCT03504397",
+      "ref": "ClinicalTrials.gov API v2 (+ EUCTR); https://clinicaltrials.gov/study/NCT06902545 \u2014 https://clinicaltrials.gov/study/NCT06902545",
+      "step": "step_02_prior_trials_and_outcomes"
+    },
+    {
+      "id": "target:her2|EVALUATED_IN|trial:nct07284134",
+      "s": "target:her2",
+      "t": "trial:nct07284134",
+      "type": "EVALUATED_IN",
+      "runs": [
+        "run-compare_her2_and_cldn18_2_in-10"
+      ],
+      "observations": 1,
+      "conf": 0.9,
+      "axis": "tractability",
+      "value": "prior program",
+      "grade": "strong",
+      "prov": "computed",
+      "source": "ClinicalTrials.gov",
+      "url": "https://clinicaltrials.gov/study/NCT07284134",
+      "ref": "ClinicalTrials.gov API v2 (+ EUCTR); https://clinicaltrials.gov/study/NCT06902545 \u2014 https://clinicaltrials.gov/study/NCT06902545",
+      "step": "step_02_prior_trials_and_outcomes"
+    },
+    {
+      "id": "disease:disease|TREATED_IN|trial:nct07284134",
+      "s": "disease:disease",
+      "t": "trial:nct07284134",
+      "type": "TREATED_IN",
+      "runs": [
+        "run-compare_her2_and_cldn18_2_in-10"
+      ],
+      "observations": 1,
+      "conf": 0.9,
+      "axis": "tractability",
+      "prov": "computed",
+      "source": "ClinicalTrials.gov",
+      "url": "https://clinicaltrials.gov/study/NCT07284134",
+      "ref": "ClinicalTrials.gov API v2 (+ EUCTR); https://clinicaltrials.gov/study/NCT06902545 \u2014 https://clinicaltrials.gov/study/NCT06902545",
+      "step": "step_02_prior_trials_and_outcomes"
+    },
+    {
+      "id": "target:b7-h3|EXPRESSED_IN|celltype:b-cells",
+      "s": "target:b7-h3",
+      "t": "celltype:b-cells",
+      "type": "EXPRESSED_IN",
+      "runs": [
+        "run-b7h3-16"
+      ],
+      "observations": 5,
+      "conf": 0.8596,
+      "axis": "specificity",
+      "value": "86% expressing \u00b7 mean 0.993",
+      "grade": "strong",
+      "prov": "computed",
+      "source": "Single-cell atlas (Scanpy)",
+      "url": "",
+      "ref": "B7-H3 in B cells: mean expr 0.993, 86% expressing.",
+      "step": "step_06_off_target_expression"
+    },
+    {
+      "id": "target:b7-h3|EXPRESSED_IN|celltype:fcgr3a-monocytes",
+      "s": "target:b7-h3",
+      "t": "celltype:fcgr3a-monocytes",
+      "type": "EXPRESSED_IN",
+      "runs": [
+        "run-b7h3-16"
+      ],
+      "observations": 5,
+      "conf": 0.0867,
+      "axis": "specificity",
+      "value": "9% expressing \u00b7 mean 0.0601",
+      "grade": "strong",
+      "prov": "computed",
+      "source": "Single-cell atlas (Scanpy)",
+      "url": "",
+      "ref": "B7-H3 in FCGR3A+ Monocytes: mean expr 0.0601, 9% expressing.",
+      "step": "step_06_off_target_expression"
+    },
+    {
+      "id": "target:b7-h3|EXPRESSED_IN|celltype:dendritic-cells",
+      "s": "target:b7-h3",
+      "t": "celltype:dendritic-cells",
+      "type": "EXPRESSED_IN",
+      "runs": [
+        "run-b7h3-16"
+      ],
+      "observations": 5,
+      "conf": 0.0811,
+      "axis": "specificity",
+      "value": "8% expressing \u00b7 mean 0.0562",
+      "grade": "strong",
+      "prov": "computed",
+      "source": "Single-cell atlas (Scanpy)",
+      "url": "",
+      "ref": "B7-H3 in Dendritic cells: mean expr 0.0562, 8% expressing.",
+      "step": "step_06_off_target_expression"
+    },
+    {
+      "id": "target:her2|GENETIC_LINK|disease:disease",
+      "s": "target:her2",
+      "t": "disease:disease",
+      "type": "GENETIC_LINK",
+      "runs": [
+        "run-assess_her2_in_breast_cancer-16"
+      ],
+      "observations": 1,
+      "conf": 0.2,
+      "axis": "target_validity",
+      "value": "no genome-wide assoc.",
+      "grade": "illustrative",
+      "prov": "computed",
+      "source": "GWAS Catalog",
+      "url": "https://www.ebi.ac.uk/gwas/",
+      "ref": "GWAS Catalog / Open Targets / PheWeb (federated) \u2014 https://www.ebi.ac.uk/gwas/",
+      "step": "step_01_gwas"
+    },
+    {
+      "id": "target:her2|OFF_TARGET_IN|tissue:broad-normal-tissue",
+      "s": "target:her2",
+      "t": "tissue:broad-normal-tissue",
+      "type": "OFF_TARGET_IN",
+      "runs": [
+        "run-assess_her2_in_breast_cancer-16"
+      ],
+      "observations": 1,
+      "conf": 0.6,
+      "axis": "specificity",
+      "value": "risk: moderate-low",
+      "grade": "illustrative",
+      "prov": "computed",
+      "source": "Derived: \u03c4-specificity analysis",
+      "url": "",
+      "ref": "derived: tau + bimodality on the fetched atlas",
+      "step": "step_04_offtarget_safety"
+    },
+    {
+      "id": "target:her2|EVALUATED_IN|trial:nct04145622",
+      "s": "target:her2",
+      "t": "trial:nct04145622",
+      "type": "EVALUATED_IN",
+      "runs": [
+        "run-assess_her2_in_breast_cancer-16"
+      ],
+      "observations": 1,
+      "conf": 0.6,
+      "axis": "tractability",
+      "value": "prior program",
+      "grade": "illustrative",
+      "prov": "computed",
+      "source": "ClinicalTrials.gov",
+      "url": "https://clinicaltrials.gov/study/NCT04145622",
+      "ref": "ClinicalTrials.gov API v2 (+ EUCTR); https://clinicaltrials.gov/study/NCT04145622 \u2014 https://clinicaltrials.gov/study/NCT04145622",
+      "step": "step_05_clinical_trials"
+    },
+    {
+      "id": "disease:disease|TREATED_IN|trial:nct04145622",
+      "s": "disease:disease",
+      "t": "trial:nct04145622",
+      "type": "TREATED_IN",
+      "runs": [
+        "run-assess_her2_in_breast_cancer-16"
+      ],
+      "observations": 1,
+      "conf": 0.6,
+      "axis": "tractability",
+      "prov": "computed",
+      "source": "ClinicalTrials.gov",
+      "url": "https://clinicaltrials.gov/study/NCT04145622",
+      "ref": "ClinicalTrials.gov API v2 (+ EUCTR); https://clinicaltrials.gov/study/NCT04145622 \u2014 https://clinicaltrials.gov/study/NCT04145622",
+      "step": "step_05_clinical_trials"
+    },
+    {
+      "id": "target:her2|EVALUATED_IN|trial:nct05276609",
+      "s": "target:her2",
+      "t": "trial:nct05276609",
+      "type": "EVALUATED_IN",
+      "runs": [
+        "run-assess_her2_in_breast_cancer-16"
+      ],
+      "observations": 1,
+      "conf": 0.6,
+      "axis": "tractability",
+      "value": "prior program",
+      "grade": "illustrative",
+      "prov": "computed",
+      "source": "ClinicalTrials.gov",
+      "url": "https://clinicaltrials.gov/study/NCT05276609",
+      "ref": "ClinicalTrials.gov API v2 (+ EUCTR); https://clinicaltrials.gov/study/NCT04145622 \u2014 https://clinicaltrials.gov/study/NCT04145622",
+      "step": "step_05_clinical_trials"
+    },
+    {
+      "id": "disease:disease|TREATED_IN|trial:nct05276609",
+      "s": "disease:disease",
+      "t": "trial:nct05276609",
+      "type": "TREATED_IN",
+      "runs": [
+        "run-assess_her2_in_breast_cancer-16"
+      ],
+      "observations": 1,
+      "conf": 0.6,
+      "axis": "tractability",
+      "prov": "computed",
+      "source": "ClinicalTrials.gov",
+      "url": "https://clinicaltrials.gov/study/NCT05276609",
+      "ref": "ClinicalTrials.gov API v2 (+ EUCTR); https://clinicaltrials.gov/study/NCT04145622 \u2014 https://clinicaltrials.gov/study/NCT04145622",
+      "step": "step_05_clinical_trials"
+    }
+  ]
+}

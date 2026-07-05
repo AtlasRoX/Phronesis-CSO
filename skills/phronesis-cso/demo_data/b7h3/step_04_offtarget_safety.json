@@ -1,0 +1,10 @@
+{
+  "skill": "openfda-safety",
+  "axis": "safety",
+  "gene": "CD276",
+  "summary": "Cell-type-specific expression implies lower broad-tissue off-target risk; main liability is shared fibroblast/stromal expression in normal tissue. FDA FAERS adverse-event snapshot shows no boxed warnings for agents targeting CD276.",
+  "broad_tissue_risk": "moderate-low",
+  "adverse_events": "No FAERS boxed warning identified for CD276-targeting agents in the FDA database. Fibroblast/stromal co-expression is the primary off-target concern; tissue-restricted expression profile suggests manageable therapeutic index.",
+  "grade": "illustrative",
+  "note": "Illustrative cached value — off-target safety read combining specificity and FDA adverse-event signals."
+}

@@ -1,0 +1,57 @@
+[project]
+name = "phronesis-cso"
+version = "0.1.0"
+description = "Hybrid Phronesis CSO over ClawBio — agentic genomics for therapeutic discovery (ClawBio Hackathon @ King's, 2026)"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+    {name = "GhostCache_"}
+]
+dependencies = [
+    "scanpy>=1.10",
+    "anndata>=0.10",
+    "numpy>=1.26",
+    "scipy>=1.13",
+    "pandas>=2.2",
+    "pyyaml>=6.0",
+    "clawbio>=0.5.2",
+]
+
+[project.optional-dependencies]
+# Live multi-agent loop for phronesis-cso (skills/phronesis-cso/harness.py).
+# Optional so the leaf skills and the offline cso.py --demo stay dependency-free.
+agents = [
+    "anthropic>=0.40",
+    "openai>=1.40",
+]
+# Optional hosted span UI for the harness trace (skills/virtual-biotech-cso/tracing.py).
+# The in-tree trace.jsonl needs nothing extra; this only enables the Langfuse mirror,
+# which activates when LANGFUSE_PUBLIC_KEY + LANGFUSE_SECRET_KEY are set. SDK v4 API.
+tracing = [
+    "langfuse>=4.0",
+]
+# Optional Vadalog reasoning over the evidence graph (frontend/prometheux_reason.py).
+# Activates the live hosted Prometheux engine when PMTX_TOKEN is set; absent it, the
+# in-process Datalog fallback runs the same rules with no dependency at all.
+reasoning = [
+    "prometheux_chain>=0.2.14",
+]
+# Local stdio MCP server that projects the single-cell .h5ad into EXPRESSED_IN facts
+# on demand (skills/dataset-projection/mcp_server.py). Wired into the loop via .mcp.json.
+mcp = [
+    "mcp>=1.2",
+]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["skills"]
+
+[tool.pytest.ini_options]
+testpaths = ["skills", "tests"]

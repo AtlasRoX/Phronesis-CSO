@@ -1,0 +1,9 @@
+{
+	"dependencies": {
+		"agentation-mcp": "^1.2.0",
+		"shiki": "^4.3.1"
+	},
+	"devDependencies": {
+		"agentation": "^3.0.2"
+	}
+}
