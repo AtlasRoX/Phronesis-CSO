@@ -34,6 +34,15 @@ A landmark Stanford paper — *[The Virtual Biotech](https://www.biorxiv.org/con
 
 ## 🗺️ System Architecture
 
+<p align="center">
+  <a href="docs/assets/architecture.svg">
+    <img src="docs/assets/architecture.svg" alt="Phronesis CSO — System Architecture" width="100%"/>
+  </a>
+</p>
+
+<details>
+<summary><b>📐 Click here for the text-rendering (mermaid) version of the same diagram</b></summary>
+
 ```mermaid
 graph TD
     subgraph UI["🖥️  Web UI  (localhost:8765)"]
@@ -85,6 +94,8 @@ graph TD
     DECIDE --> SYN
     SYN --> SSE
 ```
+
+</details>
 
 ### The Three Layers
 
