@@ -8,6 +8,7 @@
         "run-b7h3-0",
         "run-b7h3-12",
         "run-b7h3-16",
+        "run-b7h3-17",
         "run-b7h3-6"
       ],
       "canonical_symbol": "CD276",
@@ -40,6 +41,7 @@
         "run-b7h3-0",
         "run-b7h3-12",
         "run-b7h3-16",
+        "run-b7h3-17",
         "run-b7h3-6"
       ]
     },
@@ -52,6 +54,7 @@
         "run-b7h3-0",
         "run-b7h3-12",
         "run-b7h3-16",
+        "run-b7h3-17",
         "run-b7h3-6"
       ],
       "url": "https://clinicaltrials.gov/study/NCT04145622"
@@ -65,6 +68,7 @@
         "run-b7h3-0",
         "run-b7h3-12",
         "run-b7h3-16",
+        "run-b7h3-17",
         "run-b7h3-6"
       ],
       "url": "https://clinicaltrials.gov/study/NCT05276609"
@@ -140,6 +144,7 @@
       "label": "disease",
       "runs": [
         "run-assess_her2_in_breast_cancer-16",
+        "run-b7h3-17",
         "run-compare_her2_and_cldn18_2_in-10"
       ]
     },
@@ -178,6 +183,19 @@
         "run-compare_her2_and_cldn18_2_in-10"
       ],
       "url": "https://clinicaltrials.gov/study/NCT07284134"
+    },
+    {
+      "id": "disease:nsclc",
+      "kind": "Disease",
+      "label": "NSCLC",
+      "runs": [
+        "run-b7h3-16",
+        "run-b7h3-17"
+      ],
+      "canonical_symbol": "non-small cell lung carcinoma",
+      "canonical_id": "MONDO_0005233",
+      "ontology": "MONDO",
+      "alias_of": "non-small cell lung carcinoma"
     }
   ],
   "edges": [
@@ -250,11 +268,12 @@
         "run-b7h3-0",
         "run-b7h3-12",
         "run-b7h3-16",
+        "run-b7h3-17",
         "run-b7h3-6"
       ],
-      "observations": 21,
+      "observations": 23,
       "conf": 0.6,
-      "axis": "specificity",
+      "axis": "safety",
       "value": "risk: moderate-low",
       "grade": "illustrative",
       "prov": "computed",
@@ -272,9 +291,10 @@
         "run-b7h3-0",
         "run-b7h3-12",
         "run-b7h3-16",
+        "run-b7h3-17",
         "run-b7h3-6"
       ],
-      "observations": 21,
+      "observations": 23,
       "conf": 0.6,
       "axis": "tractability",
       "value": "prior program",
@@ -314,9 +334,10 @@
         "run-b7h3-0",
         "run-b7h3-12",
         "run-b7h3-16",
+        "run-b7h3-17",
         "run-b7h3-6"
       ],
-      "observations": 21,
+      "observations": 23,
       "conf": 0.6,
       "axis": "tractability",
       "value": "prior program",
@@ -804,9 +825,10 @@
       "t": "trial:nct04145622",
       "type": "TREATED_IN",
       "runs": [
-        "run-assess_her2_in_breast_cancer-16"
+        "run-assess_her2_in_breast_cancer-16",
+        "run-b7h3-17"
       ],
-      "observations": 1,
+      "observations": 2,
       "conf": 0.6,
       "axis": "tractability",
       "prov": "computed",
@@ -840,7 +862,94 @@
       "t": "trial:nct05276609",
       "type": "TREATED_IN",
       "runs": [
-        "run-assess_her2_in_breast_cancer-16"
+        "run-assess_her2_in_breast_cancer-16",
+        "run-b7h3-17"
+      ],
+      "observations": 2,
+      "conf": 0.6,
+      "axis": "tractability",
+      "prov": "computed",
+      "source": "ClinicalTrials.gov",
+      "url": "https://clinicaltrials.gov/study/NCT05276609",
+      "ref": "ClinicalTrials.gov API v2 (+ EUCTR); https://clinicaltrials.gov/study/NCT04145622 \u2014 https://clinicaltrials.gov/study/NCT04145622",
+      "step": "step_05_clinical_trials"
+    },
+    {
+      "id": "target:b7-h3|TARGETS|disease:nsclc",
+      "s": "target:b7-h3",
+      "t": "disease:nsclc",
+      "type": "TARGETS",
+      "runs": [
+        "run-b7h3-16",
+        "run-b7h3-17"
+      ],
+      "observations": 3,
+      "conf": 1.0,
+      "prov": "computed",
+      "modality": null
+    },
+    {
+      "id": "target:b7-h3|GENETIC_LINK|disease:nsclc",
+      "s": "target:b7-h3",
+      "t": "disease:nsclc",
+      "type": "GENETIC_LINK",
+      "runs": [
+        "run-b7h3-16"
+      ],
+      "observations": 1,
+      "conf": 0.2,
+      "axis": "target_validity",
+      "value": "no genome-wide assoc.",
+      "grade": "illustrative",
+      "prov": "computed",
+      "source": "GWAS Catalog",
+      "url": "https://www.ebi.ac.uk/gwas/",
+      "ref": "GWAS Catalog / Open Targets / PheWeb (federated) \u2014 https://www.ebi.ac.uk/gwas/",
+      "step": "step_01_gwas"
+    },
+    {
+      "id": "target:b7-h3|SPECIFIC_TO|disease:nsclc",
+      "s": "target:b7-h3",
+      "t": "disease:nsclc",
+      "type": "SPECIFIC_TO",
+      "runs": [
+        "run-b7h3-16"
+      ],
+      "observations": 1,
+      "conf": 0.6,
+      "axis": "specificity",
+      "value": "\u03c4=0.78",
+      "grade": "illustrative",
+      "prov": "computed",
+      "source": "Derived: \u03c4-specificity analysis",
+      "url": "",
+      "ref": "derived: tau + bimodality on the fetched atlas",
+      "step": "step_03_celltype_specificity"
+    },
+    {
+      "id": "disease:nsclc|TREATED_IN|trial:nct04145622",
+      "s": "disease:nsclc",
+      "t": "trial:nct04145622",
+      "type": "TREATED_IN",
+      "runs": [
+        "run-b7h3-16"
+      ],
+      "observations": 1,
+      "conf": 0.6,
+      "axis": "tractability",
+      "prov": "computed",
+      "source": "ClinicalTrials.gov",
+      "url": "https://clinicaltrials.gov/study/NCT04145622",
+      "ref": "ClinicalTrials.gov API v2 (+ EUCTR); https://clinicaltrials.gov/study/NCT04145622 \u2014 https://clinicaltrials.gov/study/NCT04145622",
+      "step": "step_05_clinical_trials"
+    },
+    {
+      "id": "disease:nsclc|TREATED_IN|trial:nct05276609",
+      "s": "disease:nsclc",
+      "t": "trial:nct05276609",
+      "type": "TREATED_IN",
+      "runs": [
+        "run-b7h3-16"
       ],
       "observations": 1,
       "conf": 0.6,
@@ -850,6 +959,57 @@
       "url": "https://clinicaltrials.gov/study/NCT05276609",
       "ref": "ClinicalTrials.gov API v2 (+ EUCTR); https://clinicaltrials.gov/study/NCT04145622 \u2014 https://clinicaltrials.gov/study/NCT04145622",
       "step": "step_05_clinical_trials"
+    },
+    {
+      "id": "target:b7-h3|TARGETS|disease:disease",
+      "s": "target:b7-h3",
+      "t": "disease:disease",
+      "type": "TARGETS",
+      "runs": [
+        "run-b7h3-17"
+      ],
+      "observations": 2,
+      "conf": 1.0,
+      "prov": "computed",
+      "modality": null
+    },
+    {
+      "id": "target:b7-h3|GENETIC_LINK|disease:disease",
+      "s": "target:b7-h3",
+      "t": "disease:disease",
+      "type": "GENETIC_LINK",
+      "runs": [
+        "run-b7h3-17"
+      ],
+      "observations": 1,
+      "conf": 0.2,
+      "axis": "target_validity",
+      "value": "no genome-wide assoc.",
+      "grade": "illustrative",
+      "prov": "computed",
+      "source": "GWAS Catalog",
+      "url": "https://www.ebi.ac.uk/gwas/",
+      "ref": "GWAS Catalog / Open Targets / PheWeb (federated) \u2014 https://www.ebi.ac.uk/gwas/",
+      "step": "step_01_gwas"
+    },
+    {
+      "id": "target:b7-h3|SPECIFIC_TO|disease:disease",
+      "s": "target:b7-h3",
+      "t": "disease:disease",
+      "type": "SPECIFIC_TO",
+      "runs": [
+        "run-b7h3-17"
+      ],
+      "observations": 1,
+      "conf": 0.6,
+      "axis": "specificity",
+      "value": "\u03c4=0.78",
+      "grade": "illustrative",
+      "prov": "computed",
+      "source": "Derived: \u03c4-specificity analysis",
+      "url": "",
+      "ref": "derived: tau + bimodality on the fetched atlas",
+      "step": "step_03_celltype_specificity"
     }
   ]
 }

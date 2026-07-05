@@ -9,16 +9,15 @@ SKILL_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(SKILL_DIR))
 
 import pytest  # noqa: E402
-
 from cso import (  # type: ignore # noqa: E402
     FUNCTIONAL_SKILLS,
     PlanValidationError,
+    _reroute_task,
+    _result_digest,
     case_key,
     decompose_and_route,
     load_routing,
     validate_and_bind_plan,
-    _reroute_task,
-    _result_digest,
 )
 
 SCRIPT = SKILL_DIR / "cso.py"
@@ -180,7 +179,7 @@ def test_validate_rejects_empty_plan():
 
 
 # --------------------- catalog_skills + validated reroute (changes #2/#3) -- #
-from cso import catalog_skills, REROUTE_FALLBACK_SKILL  # type: ignore # noqa: E402
+from cso import REROUTE_FALLBACK_SKILL, catalog_skills  # type: ignore # noqa: E402
 
 
 def test_catalog_skills_includes_primary_and_also():
@@ -211,7 +210,7 @@ def test_reroute_without_routing_is_backward_compatible():
 
 
 # --------------------- reviewer panel aggregation (multi-agent) ----------- #
-from cso import aggregate_panel_review, REVIEWER_LENSES  # type: ignore # noqa: E402
+from cso import REVIEWER_LENSES, aggregate_panel_review  # type: ignore # noqa: E402
 
 
 def _rev(verdict, missing=None, route_to="lit-synthesizer", scores=None):
@@ -297,7 +296,7 @@ def test_non_tavily_skill_stays_demo(monkeypatch):
 
 
 # --------------------- division grouping (Virtual Biotech structure) ------ #
-from cso import group_by_division, Subtask  # type: ignore # noqa: E402
+from cso import Subtask, group_by_division  # type: ignore # noqa: E402
 
 
 def test_group_by_division_preserves_order_and_groups():
@@ -314,7 +313,11 @@ def test_group_by_division_preserves_order_and_groups():
 
 
 # --------------------- literature patch for unavailable axes --------------- #
-from cso import _patch_with_literature, _LITERATURE_PROXY_INTENT, execute_skill  # type: ignore # noqa: E402
+from cso import (  # type: ignore # noqa: E402
+    _LITERATURE_PROXY_INTENT,
+    _patch_with_literature,
+    execute_skill,
+)
 
 
 def test_patch_requires_tavily_key(monkeypatch):

@@ -31,7 +31,8 @@ testable offline; the default ``query_fn`` is the live JarvisPy path.
 from __future__ import annotations
 
 import os
-from typing import Any, Callable, Iterable
+from collections.abc import Callable, Iterable
+from typing import Any
 
 # A PrimeKG relation row, normalized: (x_name, relation, display_relation, y_name,
 # x_type, y_type). Names are PrimeKG canonical names (gene symbol / MONDO disease).
@@ -95,7 +96,9 @@ def _live_query(names: list[str]) -> list[PrimeKGRel]:
     import prometheux_chain as px  # optional dependency
     import prometheux_reason as pr  # reuse the verified row normalizer
 
-    url = os.environ.get("JARVISPY_URL")
+    from settings import get_settings
+    _s = get_settings()
+    url = _s.jarvispy_url or os.environ.get("JARVISPY_URL")
     if url:
         px.config.set("JARVISPY_URL", url)
     project_id = px.save_project(project_name=_PX_PROJECT)
@@ -124,7 +127,9 @@ def enrich(graph, run_id: str, *, query_fn: QueryFn | None = None,
     tagged ``prov="primekg"`` and carrying NO axis/grade so the decision layer ignores
     it. ``query_fn`` is injectable for testing; the default is the live JarvisPy path.
     """
-    want = prefer == "prometheux" or (prefer == "auto" and os.environ.get("PMTX_TOKEN"))
+    from settings import get_settings
+    _s = get_settings()
+    want = prefer == "prometheux" or (prefer == "auto" and (_s.pmtx_token or os.environ.get("PMTX_TOKEN")))
     if not (want or query_fn is not None):
         return []
     by_name = _eligible(graph.nodes.values())

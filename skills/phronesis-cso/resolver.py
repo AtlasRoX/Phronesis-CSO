@@ -38,12 +38,23 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-import urllib.error
-import urllib.request
 from dataclasses import dataclass, field
 from typing import Any
 
+import httpx
+
 OT_GRAPHQL = "https://api.platform.opentargets.org/api/v4/graphql"
+
+# Module-shared sync client. ``timeout`` is conservative (Open Targets usually
+# returns in <2 s); ``http2=False`` keeps the transport list small (no extra
+# deps). A new client per call would defeat httpx's connection pooling; a
+# module-level one stays process-wide. ``headers`` mirror the previous
+# urllib shape exactly so existing OT responses don't differ.
+_HTTP = httpx.Client(timeout=httpx.Timeout(15.0), headers={
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "User-Agent": "phronesis-cso/0.1 (resolver)",
+})
 
 # Clinical abbreviations Open Targets does not index as disease synonyms. We expand
 # to the full disease name (which OT *does* resolve) rather than hardcode an id, so
@@ -87,12 +98,17 @@ class Resolution:
 
 
 def _gql(query: str, variables: dict[str, Any], *, timeout: float = 15.0) -> dict[str, Any]:
-    """POST a GraphQL query to Open Targets. Raises on transport/HTTP error."""
-    body = json.dumps({"query": query, "variables": variables}).encode()
-    req = urllib.request.Request(
-        OT_GRAPHQL, data=body, headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return json.load(resp)
+    """POST a GraphQL query to Open Targets. Raises on transport/HTTP error.
+
+    Uses ``httpx`` instead of ``urllib.request`` so the call benefits from
+    connection pooling across batched resolutions and from a clean error type
+    (``httpx.HTTPError``) we can catch uniformly. ``timeout`` overrides the
+    client default for callers that need a tighter budget (e.g. CLI in a
+    tight loop)."""
+    body = json.dumps({"query": query, "variables": variables})
+    resp = _HTTP.post(OT_GRAPHQL, content=body, timeout=timeout)
+    resp.raise_for_status()
+    return resp.json()
 
 
 def _pick_hit(term: str, hits: list[dict[str, Any]], entity: str) -> dict[str, Any] | None:
@@ -132,7 +148,7 @@ def resolve(terms: list[str], entity: str = "target", *,
         data = _gql(_MAPIDS_QUERY,
                     {"q": list({queried_for[t] for t in terms}), "e": [entity]},
                     timeout=timeout)
-    except (urllib.error.URLError, TimeoutError, OSError, ValueError) as exc:
+    except (httpx.HTTPError, TimeoutError, OSError, ValueError) as exc:
         for r in out.values():
             r.note = f"open targets unavailable ({exc}); unresolved"
         return list(out.values())

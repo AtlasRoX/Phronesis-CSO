@@ -19,7 +19,7 @@ import hashlib
 import json
 import os
 import sys
-from typing import Sequence
+from collections.abc import Sequence
 
 import numpy as np
 
@@ -196,8 +196,8 @@ def write_report(prof: dict, out_dir, demo: bool):
 
 
 def _write_reproducibility(repro_dir, argv, output_files):
-    from pathlib import Path
     import platform
+    from pathlib import Path
 
     repro_dir = Path(repro_dir)
     repro_dir.mkdir(parents=True, exist_ok=True)

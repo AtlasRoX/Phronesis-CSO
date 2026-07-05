@@ -27,15 +27,49 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 # Structured phase-event sink: emit(event_name, payload). The frontend supplies
 # one to stream the live loop as SSE; the CLI leaves it unset (console only).
 Emit = Callable[[str, dict[str, Any]], None]
+
+
+# --- structlog config (I5) ------------------------------------------------- #
+# Console renderer when stdout is a TTY (the developer runs ``cso.py`` in
+# their shell and sees the box-drawing trace); JSON renderer everywhere else
+# (CI, docker logs, journalctl, file redirection). The Trace class consults
+# ``_TTY`` and prints the box in TTY mode regardless of structlog, so the
+# fallback behaviour is unchanged for interactive users.
+def _configure_logging() -> None:
+    import logging
+
+    import structlog
+    log_json = os.environ.get("LOG_JSON", "").lower() in ("1", "true", "yes")
+    isatty = sys.stdout.isatty() if hasattr(sys, "stdout") else False
+    if log_json or not isatty:
+        renderer = structlog.processors.JSONRenderer()
+    else:
+        renderer = structlog.dev.ConsoleRenderer(colors=False)
+    structlog.configure(
+        processors=[
+            structlog.contextvars.merge_contextvars,
+            structlog.processors.add_log_level,
+            structlog.processors.TimeStamper(fmt="iso"),
+            renderer,
+        ],
+        wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
+        logger_factory=structlog.PrintLoggerFactory(),
+        cache_logger_on_first_use=True,
+    )
+
+
+_configure_logging()
 
 # Human-in-the-loop gate. Called once per review-loop pass *after* the reviewer
 # panel votes and a candidate follow-up is resolved, but *before* the loop acts on
@@ -141,19 +175,41 @@ class Trace:
     per-phase events to the UI — keeping one source of truth for the multi-agent
     loop instead of a re-implementation that drifts. ``event`` is a no-op when no
     emitter is set, so threading it through the helpers costs the CLI nothing.
-    """
+
+    I5: the per-step human trace now flows through ``structlog`` — when stdout
+    is a TTY we get the existing box-drawing console renderer (so a developer
+    running interactively sees the familiar trace); when stdout is redirected
+    to journalctl / docker logs / a file we emit one JSON record per event so
+    log shippers can parse ``event=step`` / ``event=done`` /
+    ``icon=🧬 step=plan`` uniformly. The ``--quiet`` flag still suppresses
+    everything."""
+    _LOGGER = None  # populated lazily on first .step() so config can land
 
     def __init__(self, backend: str, model: str,
-                 emit: "Emit | None" = None, *, quiet: bool = False) -> None:
+                 emit: Emit | None = None, *, quiet: bool = False) -> None:
         self._emit = emit
         self._quiet = quiet
-        if not quiet:
-            print("┌─ Phronesis CSO · live multi-agent loop")
-            print(f"│  backend: {backend}  model: {model}\n│")
+        self._backend = backend
+        self._model = model
+        if quiet:
+            return
+        # The "start" event is one record per run, not per phase.
+        self._emit_log("start", {"backend": backend, "model": model})
+
+    def _emit_log(self, name: str, fields: dict[str, Any]) -> None:
+        """Send one structured event via structlog; renderer chosen by isatty()."""
+        import structlog
+        log = self._LOGGER or structlog.get_logger("phronesis.trace")
+        log.info(name, **fields)
 
     def step(self, icon: str, msg: str) -> None:
-        if not self._quiet:
+        if self._quiet:
+            return
+        import structlog
+        log = self._LOGGER or structlog.get_logger("phronesis.trace")
+        if _TTY:
             print(f"│  {icon} {msg}")
+        log.info("step", icon=icon, message=msg, backend=self._backend, model=self._model)
 
     def event(self, name: str, payload: dict[str, Any]) -> None:
         """Emit a structured phase event to the UI (no-op without an emitter)."""
@@ -161,8 +217,21 @@ class Trace:
             self._emit(name, payload)
 
     def done(self, report: str) -> None:
-        if not self._quiet:
+        if self._quiet:
+            return
+        import structlog
+        log = self._LOGGER or structlog.get_logger("phronesis.trace")
+        if _TTY:
             print(f"│\n└─ wrote {report}")
+        log.info("done", report=report, backend=self._backend, model=self._model)
+
+
+# True when stdout is bound to a terminal (the box-drawing renderer prefers
+# this); False when stdout is redirected (docker logs, journalctl, files) and
+# the JSON renderer takes over so downstream tooling can parse events.
+import sys as _sys_mod
+
+_TTY = _sys_mod.stdout.isatty() if hasattr(_sys_mod, "stdout") else False
 
 
 def _agent_or_stub(trace: Trace, role: str, runner: runners.Runner, prompt: Path,
@@ -399,8 +468,8 @@ def _project_decision_facts(trace: Trace, decision: dict[str, Any] | None,
     try:
         sys.path.insert(0, str(Path(__file__).resolve().parents[1]
                                / "dataset-projection" / "extractors"))
-        from run_decision import _decision_facts  # noqa: E402
         from facts import write_facts  # noqa: E402
+        from run_decision import _decision_facts  # noqa: E402
         out = out_dir / "run_decision.facts.csv"
         n = write_facts(_decision_facts(decision, target, run_id), out)
         trace.step("🗄️", f"projected {n} decision facts → {out.name} "
@@ -411,11 +480,11 @@ def _project_decision_facts(trace: Trace, decision: dict[str, Any] | None,
         return None
 
 
-def _apply_gate(gate: "Gate | None", trace: Trace, *, verdict: str,
-                review: dict[str, Any], followup: "cso.Subtask | None",
+def _apply_gate(gate: Gate | None, trace: Trace, *, verdict: str,
+                review: dict[str, Any], followup: cso.Subtask | None,
                 gap: dict[str, Any] | None, iteration: int,
                 routing: dict[str, Any], executed: set[str], step_n: int
-                ) -> tuple[str, "cso.Subtask | None", dict[str, Any] | None]:
+                ) -> tuple[str, cso.Subtask | None, dict[str, Any] | None]:
     """Pause for a human at one review-loop checkpoint; apply their decision.
 
     Called after the panel has voted and the loop has resolved its *proposed*
@@ -483,7 +552,7 @@ def _review_loop(trace: Trace, runner: runners.Runner, query: str, case: str,
                  routing: dict[str, Any], results: list[dict[str, Any]],
                  demo: bool, live: bool, rec: TraceRecorder,
                  token_budget: int | None = DEFAULT_TOKEN_BUDGET,
-                 gate: "Gate | None" = None) -> dict[str, Any]:
+                 gate: Gate | None = None) -> dict[str, Any]:
     """Run reviewer→reroute until `synthesize`, the budget, or MAX_REROUTES.
 
     Each iteration re-runs the reviewer over the *current* evidence (so a re-route's
@@ -648,9 +717,9 @@ def _review_loop(trace: Trace, runner: runners.Runner, query: str, case: str,
 
 
 def run(query: str, out_dir: Path | None, *, backend: str, model: str | None,
-        demo: bool, live: bool, argv: list[str], emit: "Emit | None" = None,
+        demo: bool, live: bool, argv: list[str], emit: Emit | None = None,
         quiet: bool = False, token_budget: int | None = DEFAULT_TOKEN_BUDGET,
-        gate: "Gate | None" = None) -> dict[str, Any]:
+        gate: Gate | None = None) -> dict[str, Any]:
     """Run the live multi-agent loop.
 
     ``emit`` is an optional structured-event sink: when set (the frontend supplies

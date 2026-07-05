@@ -726,11 +726,9 @@ def _reason_prometheux(vada: str) -> ReasonResult:
     """
     import prometheux_chain as px  # optional dependency
 
-    # auth: PMTX_TOKEN is read from the env by the SDK; JARVISPY_URL points the SDK
-    # at the hosted backend (it ships defaulting to http://localhost:8000, so the
-    # hosted org/user URL MUST be applied or every call 404s). Both come from the
-    # process env, which the caller/CLI is expected to have loaded from .env.
-    url = os.environ.get("JARVISPY_URL")
+    from settings import get_settings
+    _s = get_settings()
+    url = _s.jarvispy_url or os.environ.get("JARVISPY_URL")
     if url:
         px.config.set("JARVISPY_URL", url)
 
@@ -803,7 +801,9 @@ def reason(graph: KG.KnowledgeGraph | None = None, *, prefer: str = "auto") -> R
     graph = graph or KG.KnowledgeGraph()
     vada = graph_to_vada(graph)
 
-    want_px = prefer == "prometheux" or (prefer == "auto" and os.environ.get("PMTX_TOKEN"))
+    from settings import get_settings
+    _s = get_settings()
+    want_px = prefer == "prometheux" or (prefer == "auto" and (_s.pmtx_token or os.environ.get("PMTX_TOKEN")))
     if want_px:
         try:
             return _reason_prometheux(vada)

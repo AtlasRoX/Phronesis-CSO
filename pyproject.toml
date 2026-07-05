@@ -15,6 +15,18 @@ dependencies = [
     "pandas>=2.2",
     "pyyaml>=6.0",
     "clawbio>=0.5.2",
+    # Typed JSON contracts for all LLM payloads (I1)
+    "pydantic>=2.7",
+    # Single source of truth for env vars + .env loading (I7)
+    "pydantic-settings>=2.3",
+    # LLM + HTTP retry policy (exponential backoff on 429/529) (I2)
+    "tenacity>=8.3",
+    # Sync + async HTTP client (replaces urllib) (I3)
+    "httpx>=0.27",
+    # Persistent in-process cache for kg.json reads (I6)
+    "diskcache>=5.6",
+    # Structured JSON-formatted logs (journalctl-friendly) (I5)
+    "structlog>=24.1",
 ]
 
 [project.optional-dependencies]
@@ -43,7 +55,9 @@ mcp = [
 ]
 dev = [
     "pytest>=8.0",
+    "pytest-asyncio>=0.23",
     "ruff>=0.6",
+    "pyright>=1.1",
 ]
 
 [build-system]
@@ -55,3 +69,50 @@ packages = ["skills"]
 
 [tool.pytest.ini_options]
 testpaths = ["skills", "tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+# Pragmatic lint set: catch undefined names (F821), unused imports (F401),
+# deprecation hazards (UP), and basic style (E/W/I). SIM / B / N catches
+# the noise an existing project accumulates; we leave them off so the
+# initial CI run is actionable, not 100-line red.
+select = ["E", "F", "W", "I", "UP"]
+ignore = [
+    "E501",   # long lines are tolerated — model_json_schema dumps are verbose
+    "F401",   # module-level re-exports (e.g. settings.has_llm_credentials)
+    "F841",   # locals assigned but unused (some are scaffolded for IDE help)
+]
+
+[tool.pyright]
+include = ["skills", "frontend", "tests"]
+exclude = ["**/__pycache__", "**/.pytest_cache", "**/node_modules", "**/.kgcache"]
+pythonVersion = "3.12"
+# Pragmatic CI default: enable basic + import-only checks. Stricter flags
+# (reportUnknownVariableType, reportUnknownMemberType) catch real bugs but
+# generate thousands of "unknown" warnings against the pre-existing codebase;
+# roll them out incrementally per file as I1/I7 land.
+typeCheckingMode = "basic"
+# Tolerate sibling-skill import patterns the runtime resolves via
+# ``sys.path.insert``. Pyright can't see those mutations, so reportMissing-
+# Imports against a sibling module would always fire — that's noise, not
+# signal. The pytest suite already exercises the imports end-to-end.
+reportMissingImports = "none"
+reportMissingTypeStubs = "warning"
+# Same story: pre-existing skills have wide Any usage that pyright can't
+# narrow without a code rewrite; turn these off so new code that follows
+# I1's typed-schema convention is the signal.
+reportUnknownVariableType = "none"
+reportUnknownMemberType = "none"
+reportUnknownArgumentType = "none"
+reportUnknownParameterType = "none"
+reportUnknownLambdaType = "none"
+# A handful of pre-existing scripts have ``Optional[Dict]`` plumbed through
+# the runtime contractually (a function returns None on absent-network);
+# the dict.upsert_node(..., run=None) signature in ``kg.py`` is one such
+# site. Pyright's "None cannot be assigned to str" is correct but the
+# contract was designed to be Optional; tolerate it.
+reportArgumentType = "warning"

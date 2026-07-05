@@ -36,10 +36,17 @@ def _load_requirements() -> dict:
     """Build the x402 `accepts` entry from the published payment manifest."""
     m = json.loads(MANIFEST.read_text(encoding="utf-8"))
     x = m["rails"]["x402"]
-    pay_to = os.environ.get("X402_PAY_TO", x["payTo"])
+    try:
+        from settings import get_settings
+        _s = get_settings()
+        pay_to = _s.x402_pay_to or os.environ.get("X402_PAY_TO", x["payTo"])
+        network = _s.x402_network or os.environ.get("X402_NETWORK", x["network"])
+    except ImportError:
+        pay_to = os.environ.get("X402_PAY_TO", x["payTo"])
+        network = os.environ.get("X402_NETWORK", x["network"])
     return {
         "scheme": x["scheme"],
-        "network": os.environ.get("X402_NETWORK", x["network"]),
+        "network": network,
         "maxAmountRequired": x["maxAmountRequired"],
         "asset": x["asset"],
         "payTo": pay_to,
@@ -95,7 +102,12 @@ def verify_payment(header: str | None) -> tuple[bool, dict]:
         return False, {"reason": f"undecodable payment: {exc}"}
 
     req = _load_requirements()
-    facilitator = os.environ.get("X402_FACILITATOR_URL")
+    try:
+        from settings import get_settings
+        _s = get_settings()
+        facilitator = _s.x402_facilitator_url or os.environ.get("X402_FACILITATOR_URL")
+    except ImportError:
+        facilitator = os.environ.get("X402_FACILITATOR_URL")
     if facilitator:
         return _facilitator_verify(facilitator, payload, req)
 

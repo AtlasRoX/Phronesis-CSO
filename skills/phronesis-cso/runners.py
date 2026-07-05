@@ -166,7 +166,7 @@ class AnthropicRunner:
             "input_tokens": getattr(usage, "input_tokens", 0) or 0,
             "output_tokens": getattr(usage, "output_tokens", 0) or 0,
         } if usage else {}
-        text = "".join(b.text for b in msg.content if getattr(b, "type", None) == "text")
+        text = "".join(getattr(b, "text", "") for b in msg.content if getattr(b, "type", None) == "text")
         return _extract_json(text)
 
 
@@ -303,6 +303,10 @@ class ClaudeCLIRunner:
 
     def run(self, prompt: str, context: str, schema: dict[str, Any]) -> dict[str, Any]:
         message = f"{SYSTEM}\n\n{_compose(prompt, context, schema)}"
+        # ``self._bin`` is checked in __init__, but pyright can't narrow the
+        # type after the early return; assert here so the runtime contract
+        # is preserved without scattering ``# type: ignore``.
+        assert self._bin is not None, "ClaudeCLIRunner requires claude on PATH"
         proc = subprocess.run(
             [self._bin, "-p", message, "--output-format", "json", "--model", self.model],
             capture_output=True, text=True, timeout=180,
@@ -398,21 +402,63 @@ def select_runner(backend: str = "auto", model: str | None = None) -> Runner:
 
 
 def run_with_retry(runner: Runner, prompt: str, context: str,
-                   schema: dict[str, Any], retries: int = 1) -> dict[str, Any]:
-    """Call ``runner`` with one retry on a JSON parse/agent error.
+                   schema: dict[str, Any], retries: int = 5) -> dict[str, Any]:
+    """Call ``runner`` with exponential-backoff retries on transient errors.
 
-    NoBackendError is not retried — it propagates so the harness can stub the
-    role immediately.
+    Retries: ``APITimeoutError``, ``RateLimitError`` (HTTP 429),
+    ``APIConnectionError``, ``JSONDecodeError``, and the project's
+    ``AgentError``. NoBackendError is *not* retried — it propagates so the
+    harness can stub the role immediately. Up to ``retries`` attempts (default
+    5) with exponential backoff capped at 30 s. The tenacity decorator handles
+    the loop; we keep a thin wrapper so callers don't need to import it.
     """
-    last: Exception | None = None
-    for _ in range(retries + 1):
-        try:
-            result = runner.run(prompt, context, schema)
-            if not isinstance(result, dict):
-                raise AgentError(f"runner returned {type(result).__name__}, expected dict")
-            return result
-        except NoBackendError:
-            raise
-        except Exception as exc:  # noqa: BLE001 — provider SDKs vary
-            last = exc
-    raise AgentError(f"agent failed after {retries + 1} attempts: {last}")
+    from tenacity import (
+        RetryError,
+        Retrying,
+        retry_if_exception_type,
+        stop_after_attempt,
+        wait_exponential,
+    )
+
+    retryable: tuple[type[BaseException], ...] = tuple(_RETRYABLE_EXCEPTIONS())
+    try:
+        for attempt in Retrying(
+            retry=retry_if_exception_type(retryable),
+            wait=wait_exponential(multiplier=1, min=1, max=30),
+            stop=stop_after_attempt(max(1, retries + 1)),
+            reraise=True,
+        ):
+            with attempt:
+                result = runner.run(prompt, context, schema)
+                if not isinstance(result, dict):
+                    raise AgentError(
+                        f"runner returned {type(result).__name__}, expected dict")
+                return result
+    except RetryError as exc:
+        # tenacity 8.x: ``last_exception`` is set whenever the retries gave up
+        # (the underlying exception). Older builds used ``last_attempt``;
+        # tolerate both.
+        last = getattr(exc, "last_exception", None) or getattr(
+            getattr(exc, "last_attempt", None), "exception", None)
+        raise AgentError(f"agent failed after retries: {last}") from exc
+    return {}  # unreachable — Retrying with reraise either returns or raises
+
+
+# Retryable exception types for the LLM HTTP boundary. Imported lazily inside
+# ``run_with_retry`` so this module stays importable when anthropic/openai
+# aren't installed; SDKs raise these in their error hierarchies.
+def _RETRYABLE_EXCEPTIONS() -> tuple[type[BaseException], ...]:
+    types: list[type[BaseException]] = [AgentError, json.JSONDecodeError]
+    try:
+        from anthropic import APIConnectionError, APITimeoutError, RateLimitError
+        types.extend([APIConnectionError, APITimeoutError, RateLimitError])
+    except Exception:  # noqa: BLE001 — anthropic not installed
+        pass
+    try:
+        from openai import APIConnectionError as OAIConn  # type: ignore
+        from openai import APITimeoutError as OAITimeout  # type: ignore
+        from openai import RateLimitError as OAIRate  # type: ignore
+        types.extend([OAIConn, OAITimeout, OAIRate])
+    except Exception:  # noqa: BLE001
+        pass
+    return tuple(types)

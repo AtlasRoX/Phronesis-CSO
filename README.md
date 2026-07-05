@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 # 🧬 Phronesis CSO
 
@@ -376,38 +376,50 @@ clawbio run celltype-specificity-profiler --demo
 
 ## ⚙️ Configuration
 
-Copy `.env.example` to `.env`. Everything works with zero keys in demo mode.
+Copy `.env.example` to `.env`. Everything works with zero keys in demo mode. All configurations are centralized and validated via `PhronesisSettings` (see `skills/phronesis-cso/settings.py`).
 
 ### LLM Backends (auto-selected in order)
 
-| Priority | Variable | Default Model |
-|:---:|---|---|
-| 1 | `ANTHROPIC_API_KEY` | `claude-sonnet-4-6` |
-| 2 | `NVIDIA_API_KEY` | `nvidia/llama-3-nemotron-super-102b` |
-| 3 | `OPENAI_API_KEY` | `gpt-4o-mini` |
-| 4 | `GEMINI_API_KEY` | `gemini-2.5-flash` |
+| Priority | Variable | Default Model | Runner |
+|:---:|---|---|---|
+| 1 | `ANTHROPIC_API_KEY` | `claude-sonnet-4-6` | `AnthropicRunner` |
+| 2 | `NVIDIA_API_KEY` | `nvidia/nemotron-3-super-120b-a12b` | `NIMRunner` |
+| 3 | `OPENAI_API_KEY` | `gpt-4o-mini` | `OpenAIRunner` |
+| 4 | `GEMINI_API_KEY` / `GOOGLE_API_KEY` | `gemini-2.5-flash` | `GeminiRunner` |
 
-Override any model: `VBIO_MODEL=gpt-4o python frontend/server.py`
+Override models via specific model environment variables (e.g. `ANTHROPIC_MODEL`, `NIM_MODEL`, `OPENAI_MODEL`, `GEMINI_MODEL`, `VBIO_MODEL` for global override). Timeout overrides can be set via `ANTHROPIC_TIMEOUT_S`.
 
-### Integrations
+### Reasoning Engines & Integrations
 
-| Tool | What It Powers | Variables | Without It |
+| Engine/Integration | What It Powers | Key Variables | Offline Fallback |
 |---|---|---|---|
-| **Prometheux** | Hosted Vadalog engine + PrimeKG | `PMTX_TOKEN` + `JARVISPY_URL` | In-process Datalog, same output |
-| **Tavily** | Live literature search | `TAVILY_API_KEY` | Cached demo fixture |
-| **Langfuse** | Hosted agent trace | `LANGFUSE_PUBLIC_KEY` + `LANGFUSE_SECRET_KEY` | Local `trace.jsonl` |
-| **ClawBio** | All bioinformatics skill tools | `clawbio` CLI | `--demo` fixtures |
-
-**Prometheux setup:**
-```bash
-PMTX_TOKEN=<token>
-JARVISPY_URL=https://api.prometheux.ai/jarvispy/{org}/{username}
-# Requires an active compute machine in the Prometheux dashboard
-```
+| **Prometheux** | Hosted Vadalog SaaS + PrimeKG | `PMTX_TOKEN` + `JARVISPY_URL` | In-process local Python Datalog |
+| **Neo4j DB** | Local graph reasoning + Cypher | `NEO4J_URI` + `NEO4J_USER` + `NEO4J_PASSWORD` | In-process local Python Datalog |
+| **Tavily** | Live literature search | `TAVILY_API_KEY` | Cached static demo fixtures |
+| **Langfuse** | Cloud agent tracing | `LANGFUSE_PUBLIC_KEY` + `LANGFUSE_SECRET_KEY` | Local `trace.jsonl` files |
+| **ClawBio** | Bioinformatics tools runner | `clawbio` CLI | Bundle-integrated demo fixtures |
 
 ---
 
 ## 🔑 Key Features Explained
+
+### Type-Safe LLM Boundaries (Pydantic v2)
+All agent JSON payloads (briefing, planner, reviewer panel, division findings, synthesis) are strictly validated at the boundary via Pydantic v2 models (see `skills/phronesis-cso/schemas.py`). Bad LLM shapes are caught instantly, avoiding downstream execution failures.
+
+### Tenacity HTTP Retry Policy
+LLM requests are protected by exponential-backoff retries using `tenacity` (see `skills/phronesis-cso/runners.py`). Transient connection errors, API timeouts, and 429 rate limit spikes are retried up to 5 times (max 30s backoff) before failing.
+
+### Open-Source Neo4j Graph Reasoning
+As an alternative to Prometheux SaaS, graph reasoning can run locally on Neo4j using Cypher queries (see `skills/phronesis-cso/neo4j_reason.py`). It pushes evidence to your local graph database and proves identical logic patterns (`co_niche`, `shares_axis`, `strong_claim`, `differentiates`).
+
+### Persistent In-Process Cache (`diskcache`)
+Successive knowledge-graph reads avoid re-parsing file overhead using `diskcache` (see `skills/phronesis-cso/kg.py`). Cache invalidation is automatic: keys are bound to the file's `mtime_ns` and `size`, so any graph write (`commit()`) busts the cache instantly.
+
+### Structured Logging (`structlog`)
+Structured telemetry events are output using `structlog` (see `skills/phronesis-cso/harness.py`). It prints clean, colorized box-drawing lines on interactive TTY stdout and switches to JSON format when stdout is redirected to journalctl or log collectors.
+
+### Server-Side Rate Limiting & CORS
+The web backend (see `frontend/server.py`) includes a token-bucket rate limiter (steadystate per-IP limit `RATE_LIMIT_PER_MIN`, burst capacity `RATE_LIMIT_BURST`, and global concurrent SSE cap `RATE_LIMIT_CONCURRENT`). It also exposes standard CORS preflight `OPTIONS` with cached max age.
 
 ### Demo Mode — Any Query Works
 Type any target-disease combination in demo mode and get a complete, customised report instantly. The system dynamically adapts the B7-H3 fixtures to match your query.

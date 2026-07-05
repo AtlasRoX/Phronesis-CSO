@@ -29,8 +29,8 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE / "extractors"))
 
-from facts import write_facts  # noqa: E402
 import pbmc3k_expression as pbmc  # noqa: E402
+from facts import write_facts  # noqa: E402
 
 mcp = FastMCP("dataset-projection")
 

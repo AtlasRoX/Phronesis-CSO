@@ -31,8 +31,9 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from facts import Fact, node_id, write_facts  # noqa: E402

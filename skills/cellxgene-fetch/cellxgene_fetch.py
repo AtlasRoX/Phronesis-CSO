@@ -19,8 +19,8 @@ import argparse
 import hashlib
 import json
 import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 SKILL_NAME = "cellxgene-fetch"
 VERSION = "0.1.0"

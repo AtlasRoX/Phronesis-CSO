@@ -1,13 +1,13 @@
 """Tests for the celltype-specificity-profiler skill."""
 import json
-import os
 import subprocess
 import sys
+from pathlib import Path
 
 import numpy as np
 import pytest
 
-SKILL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SKILL_DIR = str(Path(__file__).resolve().parent.parent)
 sys.path.insert(0, SKILL_DIR)
 
 from profiler import bimodality_coefficient, compute_tau  # noqa: E402
@@ -74,7 +74,7 @@ def test_end_to_end_demo(tmp_path):
     result = subprocess.run(
         [
             sys.executable,
-            os.path.join(SKILL_DIR, "profiler.py"),
+            str(Path(SKILL_DIR) / "profiler.py"),
             "--demo",
             "--trial-prior",
             "--out",
@@ -125,7 +125,7 @@ def test_demo_tau_in_expected_range(tmp_path):
     subprocess.run(
         [
             sys.executable,
-            os.path.join(SKILL_DIR, "profiler.py"),
+            str(Path(SKILL_DIR) / "profiler.py"),
             "--demo",
             "--out",
             str(out),

@@ -262,6 +262,9 @@ def validate_and_bind_plan(
             raise PlanValidationError(f"plan step {i} is not an object")
         division = entry.get("division")
         intent = entry.get("intent")
+        if not isinstance(division, str) or not isinstance(intent, str):
+            raise PlanValidationError(
+                f"plan step {i}: division and intent must be strings")
         if division not in routable:
             raise PlanValidationError(
                 f"plan step {i}: unknown division {division!r} "
@@ -324,21 +327,24 @@ def bind_questions(
         if not isinstance(entry, dict):
             continue
         q = str(entry.get("question") or "investigate the target").strip()
-        division, intent = entry.get("division"), entry.get("intent")
-        bound = (division in routable and intent in routable.get(division, set()))
+        division = entry.get("division")
+        intent = entry.get("intent")
+        division_str = division if isinstance(division, str) else ""
+        intent_str = intent if isinstance(intent, str) else ""
+        bound = (division_str in routable and intent_str in routable.get(division_str, set()))
         if bound:
             n += 1
-            step = f"step_{n:02d}_{intent}"
+            step = f"step_{n:02d}_{intent_str}"
             deps = [d for d in (entry.get("depends_on") or []) if d in seen_steps]
-            subtasks.append(Subtask(step=step, division=division, question=q,
-                                    skill=_skill_for(routing, division, intent),
+            subtasks.append(Subtask(step=step, division=division_str, question=q,
+                                    skill=_skill_for(routing, division_str, intent_str),
                                     depends_on=deps))
             seen_steps.add(step)
         else:
             # name the tool gap when the question fit a real intent but a deferred skill
             note = entry.get("rationale") or ""
-            if division in all_intents and intent in all_intents.get(division, set()):
-                note = (note + " ").strip() + f"(needs {_skill_for(routing, division, intent)}, " \
+            if division_str in all_intents and intent_str in all_intents.get(division_str, set()):
+                note = (note + " ").strip() + f"(needs {_skill_for(routing, division_str, intent_str)}, " \
                        "not yet runnable — see docs/deferred-skills.md)"
             experiments.append({"experiment": q, "rationale": note,
                                 "expected_readout": "would answer this open question"})
@@ -548,10 +554,10 @@ def _parse_query_target_disease(query: str) -> tuple[str, str]:
         # Fallback: look for common targets or uppercase words
         words = [w for w in query.split() if any(c.isupper() for c in w)]
         target = words[0] if words else "Target"
-    
+
     # Strip common punctuation from target
     target = target.strip(".,;:?!'\"()[]{}")
-    
+
     # Determine disease
     disease = "cancer"
     if "lung adenocarcinoma" in q:
@@ -602,7 +608,7 @@ def _load_demo_json(case: str, name: str) -> dict[str, Any] | None:
             return None
     with path.open("r", encoding="utf-8") as fh:
         data = json.load(fh)
-    
+
     # If a query is currently running, dynamically adapt the demo text to it!
     if CURRENT_QUERY:
         target, disease = _parse_query_target_disease(CURRENT_QUERY)
@@ -886,7 +892,7 @@ def execute_skill(task: Subtask, case: str, demo: bool, live: bool,
     reviewer follow-up that steers a *deeper* re-route's live search toward the specific
     missing evidence. No LLM is involved.
     """
-    envelope = {
+    envelope: dict[str, Any] = {
         "step": task.step,
         "division": task.division,
         "skill": task.skill,
@@ -1010,7 +1016,7 @@ def _evidence_reference(env: dict[str, Any]) -> str:
                 bits.append(f"{k}={res[k]}")
         if res.get("source") and str(res["source"]) not in bits:
             bits.append(str(res["source"]))
-    cite = "; ".join(_md_escape(str(b)) for b in bits if b)
+    cite = "; ".join(_md_escape(b) for b in bits if b)
     # Prefer a deep link to the *actual* trial record (NCT…/EUCTR id) over the
     # registry homepage, so trial citations point at the study, not clinicaltrials.gov/.
     deep = _trial_deep_link(json.dumps(res, default=str)) if isinstance(res, dict) else ""

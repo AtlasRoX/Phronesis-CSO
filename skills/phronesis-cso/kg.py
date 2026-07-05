@@ -28,6 +28,23 @@ from typing import Any
 STORE = Path(__file__).resolve().parent / "kg.json"
 _LOCK = threading.Lock()
 
+# --- I6 diskcache for kg.json reads --------------------------------------- #
+# Persistent in-process cache of parsed (nodes, edges) keyed by
+# ``(mtime_ns, size)`` so any commit() (which re-writes the file) busts the
+# entry automatically. Lives next to kg.json so it's part of the same
+# scratch dir and gets cleared by the same gitignore. ``diskcache`` is a
+# pure-Python dep (Apache-2.0); absent the import we fall back to a plain
+# dict cache (still avoids the second read in the same process).
+try:
+    import diskcache  # type: ignore
+    _KG_READ_CACHE: diskcache.Cache | None = diskcache.Cache(
+        directory=str(STORE.parent / ".kgcache"), eviction_policy="none")
+except Exception:  # noqa: BLE001 — diskcache is optional; degrade gracefully
+    _KG_READ_CACHE = None
+
+# Module-level fallback for "diskcache not installed" — bounded dict.
+_FALLBACK_CACHE: dict[str, tuple[dict, dict]] = {}
+
 
 def _slug(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", (text or "").strip().lower()).strip("-") or "x"
@@ -182,13 +199,40 @@ class KnowledgeGraph:
 
     # --- persistence -------------------------------------------------------- #
     def _load(self) -> None:
-        if self.store.exists():
-            try:
-                data = json.loads(self.store.read_text())
-                self.nodes = {n["id"]: n for n in data.get("nodes", [])}
-                self.edges = {e["id"]: e for e in data.get("edges", [])}
-            except Exception:
-                self.nodes, self.edges = {}, {}
+        if not self.store.exists():
+            return
+        # Cache key includes (mtime_ns, size) — a commit() that re-writes
+        # kg.json changes both, so the entry is automatically invalidated.
+        # Lock the disk read+parse so concurrent process-startups don't all
+        # parse the same file in parallel.
+        try:
+            stat = self.store.stat()
+            key = f"{stat.st_mtime_ns}-{stat.st_size}"
+        except OSError:
+            return
+        cached: tuple[dict[str, Any], dict[str, Any]] | None = None
+        if _KG_READ_CACHE is not None:
+            v = _KG_READ_CACHE.get(key)
+            if isinstance(v, tuple) and len(v) == 2:
+                cached = (v[0], v[1])
+        else:
+            v = _FALLBACK_CACHE.get(key)
+            if isinstance(v, tuple) and len(v) == 2:
+                cached = (v[0], v[1])
+        if cached is not None:
+            self.nodes, self.edges = cached
+            return
+        try:
+            data = json.loads(self.store.read_text())
+            self.nodes = {n["id"]: n for n in data.get("nodes", [])}
+            self.edges = {e["id"]: e for e in data.get("edges", [])}
+        except Exception:
+            self.nodes, self.edges = {}, {}
+            return
+        if _KG_READ_CACHE is not None:
+            _KG_READ_CACHE[key] = (self.nodes, self.edges)
+        else:
+            _FALLBACK_CACHE[key] = (self.nodes, self.edges)
 
     def _save(self) -> None:
         self.store.write_text(json.dumps(

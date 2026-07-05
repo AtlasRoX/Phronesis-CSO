@@ -28,9 +28,9 @@ from __future__ import annotations
 
 import csv
 import re
-from dataclasses import dataclass, asdict
+from collections.abc import Iterable
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Iterable
 
 COLUMNS = ["subject", "relation", "object", "value",
            "confidence", "source_dataset", "provenance"]

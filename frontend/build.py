@@ -8,12 +8,11 @@ Node toolchain is required. Run after editing app.jsx.
 """
 import json
 import pathlib
+import platform
 import re
 import subprocess
 import sys
 import tempfile
-
-import platform
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent

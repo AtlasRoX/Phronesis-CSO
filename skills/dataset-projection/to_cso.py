@@ -77,7 +77,7 @@ def _orient(subject: str, obj: str, relation: str) -> tuple[str, str]:
 
 def import_facts(csv_paths: list[Path], store: Path) -> int:
     graph = KG.KnowledgeGraph(store=store)
-    run = f"dataset-projection-import"
+    run = "dataset-projection-import"
     n = 0
     for path in csv_paths:
         for r in csv.DictReader(path.open()):

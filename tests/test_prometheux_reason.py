@@ -19,9 +19,9 @@ import prometheux_reason as pr  # type: ignore # noqa: E402
 
 
 @pytest.fixture
-def graph() -> KG.KnowledgeGraph:
+def graph(tmp_path: Path) -> KG.KnowledgeGraph:
     """Two targets sharing the fibroblast niche; MET clears the strong gate."""
-    g = KG.KnowledgeGraph(store=Path(tempfile.mktemp(suffix=".json")))
+    g = KG.KnowledgeGraph(store=tmp_path / "graph.json")
     g.upsert_edge("target:b7-h3", "celltype:fibroblast", "EXPRESSED_IN", conf=0.61, axis="target_id", run="r1")
     g.upsert_edge("target:met", "celltype:fibroblast", "EXPRESSED_IN", conf=0.55, axis="target_id", run="r2")
     g.upsert_edge("target:met", "disease:nsclc", "SPECIFIC_TO", conf=0.9, axis="specificity", run="r2")
@@ -56,8 +56,8 @@ def test_explain_a_rank(graph: KG.KnowledgeGraph) -> None:
     assert any("ranks over" in e["nl"] for e in res.explanations)
 
 
-def test_empty_graph_derives_nothing() -> None:
-    g = KG.KnowledgeGraph(store=Path(tempfile.mktemp(suffix=".json")))
+def test_empty_graph_derives_nothing(tmp_path: Path) -> None:
+    g = KG.KnowledgeGraph(store=tmp_path / "graph.json")
     res = pr.reason(g, prefer="local")
     assert res.derived["co_niche"] == []
     assert res.explanations == []
@@ -144,9 +144,9 @@ def test_rank_targets_leaderboard_orders_by_net_wins(graph: KG.KnowledgeGraph) -
     assert "specificity" in board[0]["wins_on"]
 
 
-def test_rank_explanations_empty_for_single_target() -> None:
+def test_rank_explanations_empty_for_single_target(tmp_path: Path) -> None:
     """Nothing to differentiate with one target → no ranking edges."""
-    g = KG.KnowledgeGraph(store=Path(tempfile.mktemp(suffix=".json")))
+    g = KG.KnowledgeGraph(store=tmp_path / "graph.json")
     g.upsert_edge("target:solo", "disease:luad", "SPECIFIC_TO", conf=0.9,
                   axis="specificity", run="r1")
     assert pr.rank_explanations(g, prefer="local") == []

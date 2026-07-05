@@ -41,10 +41,11 @@ import json
 import os
 import time
 import uuid
+from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 
 @dataclass
@@ -64,13 +65,13 @@ class Span:
     status: str = "ok"  # "ok" | "error" | "stub"
     error: str | None = None
 
-    def set(self, **attrs: Any) -> "Span":
+    def set(self, **attrs: Any) -> Span:
         """Attach arbitrary metadata (role source, verdict, backend, …)."""
         self.attrs.update(attrs)
         return self
 
     def record_usage(self, *, input_tokens: int = 0, output_tokens: int = 0,
-                     **_ignore: int) -> "Span":
+                     **_ignore: int) -> Span:
         """Accumulate token usage for this span (and roll up to the run total).
 
         Extra keys (e.g. a backend's ``total_tokens`` or cache splits) are ignored
@@ -202,7 +203,7 @@ class _LangfuseExporter:
     """
 
     def __init__(self, name: str, run_id: str, meta: dict[str, Any]) -> None:
-        self._client = None
+        self._client: Any = None
         self._name = name
         self._run_id = run_id
         self._meta = meta
@@ -222,7 +223,7 @@ class _LangfuseExporter:
         # renders cost; everything else is a plain span.
         return "generation" if kind == "agent" else "span"
 
-    def _obs_kwargs(self, sp: "Span") -> dict[str, Any]:
+    def _obs_kwargs(self, sp: Span) -> dict[str, Any]:
         """Map a Span to start_observation() kwargs (v4 accepts these directly)."""
         kw: dict[str, Any] = {
             "name": sp.name,
@@ -242,7 +243,7 @@ class _LangfuseExporter:
             kw["model"] = model
         return kw
 
-    def _emit_scores(self, sp: "Span", obs: Any) -> None:
+    def _emit_scores(self, sp: Span, obs: Any) -> None:
         """Post a span's LLM-as-a-judge verdict as Langfuse scores on its observation.
 
         The reviewer panel folds N lenses into one verdict + per-axis 1–5 scores and
@@ -278,7 +279,7 @@ class _LangfuseExporter:
                         f"forced_by_engine={sp.attrs.get('forced_by_engine')}",
                 score_id=f"{sp.span_id}-verdict", **kw)
 
-    def export(self, root: "Span", spans: list["Span"]) -> None:
+    def export(self, root: Span, spans: list[Span]) -> None:
         """Create the trace + observation tree, then flush. Root-first ordering."""
         if self._client is None:
             return

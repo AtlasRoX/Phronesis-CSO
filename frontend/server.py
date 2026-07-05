@@ -27,15 +27,16 @@ import sys
 import traceback
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 HERE = Path(__file__).resolve().parent
 SKILL = HERE.parent / "skills" / "phronesis-cso"
 sys.path.insert(0, str(SKILL))
 
-import cso          # noqa: E402  (sibling skill module)
-import harness      # noqa: E402  (the real multi-agent loop, driven via emit())
-import kg as KG      # noqa: E402  (persistent canonical knowledge graph)
+import cso  # noqa: E402  (sibling skill module)
+import harness  # noqa: E402  (the real multi-agent loop, driven via emit())
+import kg as KG  # noqa: E402  (persistent canonical knowledge graph)
 
 # default config, overridable via CLI
 CONFIG = {"backend": "auto", "model": None}
@@ -45,7 +46,7 @@ GRAPH = KG.KnowledgeGraph()
 
 
 def _sse(event: str, data: dict) -> bytes:
-    return f"event: {event}\ndata: {json.dumps(data, default=str)}\n\n".encode("utf-8")
+    return f"event: {event}\ndata: {json.dumps(data, default=str)}\n\n".encode()
 
 
 import re as _re
@@ -170,10 +171,96 @@ import queue as _queue
 import threading as _threading
 
 _HITL_LOCK = _threading.Lock()
-_HITL_QUEUES: "dict[str, _queue.Queue[dict]]" = {}
+_HITL_QUEUES: dict[str, _queue.Queue[dict]] = {}
 # How long the gate waits for a human before proceeding with the panel's autonomous
 # verdict — so a closed tab or a distracted operator never wedges the loop forever.
 HITL_TIMEOUT_S = 180.0
+
+
+# --- rate limiting -------------------------------------------------------- #
+# Hand-rolled token bucket keyed by client IP. Default budget: 5 in-flight
+# concurrent /api/run requests + 60 per minute per IP, both configurable via
+# RATE_LIMIT_BURST / RATE_LIMIT_PER_MIN / RATE_LIMIT_CONCURRENT env vars (read
+# from the same ``PhronesisSettings`` singleton everything else uses, so a
+# change in .env is picked up at boot). The 429 reply carries ``Retry-After``
+# so a polite client backs off without retry-storming the LLM.
+class _TokenBucket:
+    """Thread-safe per-key token bucket. Lazy refill on each ``take()``.
+
+    ``take(cost)`` returns True if ``cost`` tokens are available *and* deducts
+    them; otherwise it returns False (the caller replies 429). Refill is
+    ``rate * elapsed_seconds`` tokens, capped at ``burst``. The math is integer
+    milliseconds to keep this dependency-free and to avoid float drift between
+    threads."""
+    __slots__ = ("tokens", "last_ms", "lock")
+
+    def __init__(self, burst: int, rate_per_s: float):
+        self.tokens = float(burst)
+        self.last_ms = _now_ms()
+        self.lock = _threading.Lock()
+
+    def take(self, cost: float = 1.0) -> tuple[bool, int]:
+        """Return ``(ok, retry_after_s)``. ``retry_after_s`` is 0 when ok=True."""
+        with self.lock:
+            now = _now_ms()
+            elapsed = max(0, now - self.last_ms) / 1000.0
+            self.tokens = min(float(_BURST), self.tokens + elapsed * _RATE_PER_S)
+            self.last_ms = now
+            if self.tokens >= cost:
+                self.tokens -= cost
+                return True, 0
+            deficit = cost - self.tokens
+            retry_after = max(1, int(deficit / _RATE_PER_S) + 1)
+            return False, retry_after
+
+
+def _now_ms() -> int:
+    import time
+    return int(time.monotonic() * 1000)
+
+
+import os as _os
+
+try:
+    from settings import get_settings
+    _s = get_settings()
+    _BURST = _s.rate_limit_burst
+    _PER_MIN = _s.rate_limit_per_min
+    _MAX_CONCURRENT = _s.rate_limit_concurrent
+    _CORS_MAX_AGE_S = _s.cors_max_age_s
+except ImportError:
+    _BURST = max(1, int(_os.environ.get("RATE_LIMIT_BURST", "5")))
+    _PER_MIN = max(1, int(_os.environ.get("RATE_LIMIT_PER_MIN", "60")))
+    _MAX_CONCURRENT = max(1, int(_os.environ.get("RATE_LIMIT_CONCURRENT", "4")))
+    _CORS_MAX_AGE_S = max(0, int(_os.environ.get("CORS_MAX_AGE_S", "600")))
+
+_RATE_PER_S = _PER_MIN / 60.0
+_BUCKETS: dict[str, _TokenBucket] = {}
+_BUCKETS_LOCK = _threading.Lock()
+_INFLIGHT = 0
+_INFLIGHT_LOCK = _threading.Lock()
+
+
+def _take_token(ip: str) -> tuple[bool, int]:
+    """Atomically reserve one token + one concurrent slot. Returns (ok, retry_s)."""
+    global _INFLIGHT
+    with _BUCKETS_LOCK:
+        b = _BUCKETS.get(ip) or _TokenBucket(_BURST, _RATE_PER_S)
+        _BUCKETS[ip] = b
+    ok, retry = b.take()
+    if not ok:
+        return False, retry
+    with _INFLIGHT_LOCK:
+        if _INFLIGHT >= _MAX_CONCURRENT:
+            return False, max(1, int(60.0 / _RATE_PER_S))
+        _INFLIGHT += 1
+    return True, 0
+
+
+def _release_token() -> None:
+    global _INFLIGHT
+    with _INFLIGHT_LOCK:
+        _INFLIGHT = max(0, _INFLIGHT - 1)
 
 
 def _hitl_gate(run_id: str, emit):
@@ -184,7 +271,7 @@ def _hitl_gate(run_id: str, emit):
     queue, emits a ``checkpoint_wait`` event the UI renders as a pause, and blocks
     until the browser POSTs a decision (or the timeout elapses → auto-approve)."""
     def gate(checkpoint: dict) -> dict:
-        q: "_queue.Queue[dict]" = _queue.Queue(maxsize=1)
+        q: _queue.Queue[dict] = _queue.Queue(maxsize=1)
         with _HITL_LOCK:
             _HITL_QUEUES[run_id] = q
         emit("checkpoint_wait", {"run_id": run_id, **checkpoint})
@@ -242,7 +329,7 @@ def run_loop(query: str, *, demo: bool, live: bool, partial: bool = False,
     # thread (harness.run is blocking; we want to stream as events arrive).
     import queue
     import threading
-    q: "queue.Queue[tuple[str, dict] | None]" = queue.Queue()
+    q: queue.Queue[tuple[str, dict] | None] = queue.Queue()
     box: dict[str, Any] = {}
 
     def emit(event: str, payload: dict) -> None:
@@ -424,6 +511,24 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(404)
         self.end_headers()
 
+    # --- CORS preflight --------------------------------------------------- #
+    # A permissive do_OPTIONS that echoes the requested method + headers so the
+    # browser's preflight succeeds for fetch() from any origin. CORS_MAX_AGE_S
+    # lets the browser cache the preflight for the configured window. Applies
+    # to every path the handler routes to (static + API).
+    def do_OPTIONS(self):
+        requested_method = self.headers.get("Access-Control-Request-Method", "GET")
+        requested_headers = self.headers.get("Access-Control-Request-Headers", "")
+        self.send_response(200)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", requested_headers or "*")
+        self.send_header("Access-Control-Max-Age", str(_CORS_MAX_AGE_S))
+        # Echo the requested method on a header many CDNs / browsers also look at.
+        self.send_header("Allow", requested_method)
+        self.send_header("Content-Length", "0")
+        self.end_headers()
+
     # --- human-in-the-loop decision delivery ----------------------------- #
     def _decision(self, qs):
         run_id = qs.get("run_id", [""])[0]
@@ -538,13 +643,26 @@ class Handler(BaseHTTPRequestHandler):
         # human decision (approve / override / redirect / add-gap) posted to
         # /api/decision. Default off → the loop runs fully autonomously.
         hitl = qs.get("hitl", ["0"])[0] in ("1", "true")
-        self.send_response(200)
-        self.send_header("Content-Type", "text/event-stream")
-        self.send_header("Cache-Control", "no-cache")
-        self.send_header("Connection", "keep-alive")
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.end_headers()
+        # Rate-limit /api/run: a per-IP token bucket + a global in-flight cap. Pre-
+        # flight 429 before the streaming handshake so a runaway client gets a
+        # well-formed Retry-After instead of a torn SSE stream.
+        ip = self.client_address[0] if self.client_address else "unknown"
+        ok, retry = _take_token(ip)
+        if not ok:
+            self._json(
+                {"error": "rate_limited",
+                 "retry_after_s": retry,
+                 "burst": _BURST, "per_min": _PER_MIN, "concurrent": _MAX_CONCURRENT},
+                status=429, headers={"Retry-After": str(retry),
+                                     "Access-Control-Allow-Origin": "*"})
+            return
         try:
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream")
+            self.send_header("Cache-Control", "no-cache")
+            self.send_header("Connection", "keep-alive")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
             for event, data in run_loop(query, demo=demo, live=live, partial=partial,
                                         backend=backend, token_budget=token_budget,
                                         hitl=hitl):
@@ -559,6 +677,8 @@ class Handler(BaseHTTPRequestHandler):
                 self.wfile.flush()
             except Exception:
                 pass
+        finally:
+            _release_token()
 
     # --- static files ---------------------------------------------------- #
     # Route map: "/" serves the marketing landing site; "/app" serves the live
@@ -606,12 +726,23 @@ def main():
     CONFIG["backend"] = args.backend
     CONFIG["model"] = args.model
     srv = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
-    print(f"Phronesis CSO — live server on http://localhost:{args.port}")
-    print(f"  backend={args.backend}  (open the URL and submit a query)")
+    # I5: emit a structured "server.start" event before serving so log shippers
+    # can correlate the first HTTP request with the boot line. We still echo a
+    # human line on a TTY because the user is staring at the shell.
+    import structlog
+    log = structlog.get_logger("phronesis.server")
+    log.info("server.start", port=args.port, backend=args.backend,
+             model=args.model, rate_burst=_BURST, rate_per_min=_PER_MIN,
+             rate_concurrent=_MAX_CONCURRENT, cors_max_age_s=_CORS_MAX_AGE_S)
+    if sys.stdout.isatty():
+        print(f"Phronesis CSO — live server on http://localhost:{args.port}")
+        print(f"  backend={args.backend}  (open the URL and submit a query)")
     try:
         srv.serve_forever()
     except KeyboardInterrupt:
-        print("\nshutting down")
+        log.info("server.shutdown", port=args.port)
+        if sys.stdout.isatty():
+            print("\nshutting down")
 
 
 if __name__ == "__main__":
