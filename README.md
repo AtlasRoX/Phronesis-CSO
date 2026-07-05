@@ -14,7 +14,7 @@
 
 ---
 
-## 🎯 The Problem — In 30 Seconds
+## 🎯 The Problem
 
 Choosing the right drug target is the single most expensive decision in pharmaceutical R&D. **Nine out of ten clinical drug programs fail**, and most failures trace back to one mistake: picking the wrong target.
 
